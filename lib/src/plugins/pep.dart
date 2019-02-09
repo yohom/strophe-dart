@@ -2,7 +2,7 @@ import 'package:strophe/src/core.dart';
 import 'package:strophe/src/enums.dart';
 import 'package:strophe/src/plugins/plugins.dart';
 import 'package:strophe/src/plugins/pubsub.dart';
-import 'package:xml/xml/nodes/node.dart';
+import 'package:xml/xml.dart';
 
 class PepPlugin extends PluginClass {
   init(StropheConnection c) {

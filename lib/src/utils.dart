@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:strophe/src/enums.dart';
-import 'package:xml/xml/nodes/element.dart';
+import 'package:xml/xml.dart';
 
 // Copyright (c) 2015, the Dart project authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a

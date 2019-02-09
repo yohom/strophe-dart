@@ -22,8 +22,7 @@ class MD5 {
     String str = "";
     for (int i = 0; i < bin.length * 32; i += 8) {
       //str += new String.fromCharCode((bin[i >> 5] >>> (i % 32)) & 255);
-      str +=
-          String.fromCharCode(_zeroFillRightShift(bin[i >> 5], (i % 32)) & 255);
+      str += String.fromCharCode(_zeroFillRightShift(bin[i >> 5], (i % 32)) & 255);
     }
     return str;
   }
@@ -32,12 +31,8 @@ class MD5 {
     const String hex_tab = "0123456789abcdef";
     String str = "";
     for (int i = 0; i < binarray.length * 4; i++) {
-      str += hex_tab
-              .split('')
-              .elementAt((binarray[i >> 2] >> ((i % 4) * 8 + 4)) & 0xF) +
-          hex_tab
-              .split('')
-              .elementAt((binarray[i >> 2] >> ((i % 4) * 8)) & 0xF);
+      str += hex_tab.split('').elementAt((binarray[i >> 2] >> ((i % 4) * 8 + 4)) & 0xF) +
+          hex_tab.split('').elementAt((binarray[i >> 2] >> ((i % 4) * 8)) & 0xF);
     }
     return str;
   }
@@ -109,8 +104,7 @@ class MD5 {
       } else {
         y = 0;
       }
-      b = add32(
-          b, rotl32(add32(add32(a, e), add32(_noise[i], y)), _shiftAmounts[i]));
+      b = add32(b, rotl32(add32(add32(a, e), add32(_noise[i], y)), _shiftAmounts[i]));
       a = temp;
     }
 

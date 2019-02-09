@@ -4,6 +4,7 @@ import 'package:strophe/src/utils.dart';
 
 class SHA1 {
   static const mask32 = 0xFFFFFFFF;
+
   static Future<List<int>> core_sha1(List<int> chunk, int len) async {
     List<int> digest = List<int>(5);
     digest[0] = 0x67452301;
@@ -29,12 +30,7 @@ class SHA1 {
         }
         _extended[i] = y;
       } else {
-        _extended[i] = rotl32(
-            _extended[i - 3] ^
-                _extended[i - 8] ^
-                _extended[i - 14] ^
-                _extended[i - 16],
-            1);
+        _extended[i] = rotl32(_extended[i - 3] ^ _extended[i - 8] ^ _extended[i - 14] ^ _extended[i - 16], 1);
       }
 
       var newA = add32(add32(rotl32(a, 5), e), _extended[i]);
@@ -123,8 +119,7 @@ class SHA1 {
       if (bin[i >> 5] == null) {
         bin[i >> 5] = (str.codeUnitAt((i / 8).round()) & mask) << (24 - i % 32);
       } else {
-        bin[i >> 5] |=
-            (str.codeUnitAt((i / 8).round()) & mask) << (24 - i % 32);
+        bin[i >> 5] |= (str.codeUnitAt((i / 8).round()) & mask) << (24 - i % 32);
       }
     }
     return bin;
@@ -138,8 +133,7 @@ class SHA1 {
     int mask = 255;
     for (int i = 0; i < bin.length * 32; i += 8) {
       //str += new String.fromCharCode((bin[i >> 5] >>> (24 - i % 32)) & mask);
-      str += new String.fromCharCode(
-          _zeroFillRightShift(bin[i >> 5], (24 - i % 32)) & mask);
+      str += new String.fromCharCode(_zeroFillRightShift(bin[i >> 5], (24 - i % 32)) & mask);
     }
     return str;
   }
@@ -148,8 +142,7 @@ class SHA1 {
  * Convert an array of big-endian words to a base-64 string
  */
   static Future<String> binb2b64(List<int> binarray) async {
-    String tab =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    String tab = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
     String str = "";
     int triplet;
     int bin, bin2, bin3;
@@ -157,9 +150,8 @@ class SHA1 {
       bin = (i >> 2) < binarray.length ? binarray[i >> 2] : 0;
       bin2 = (i + 1 >> 2) < binarray.length ? binarray[i + 1 >> 2] : 0;
       bin3 = (i + 2 >> 2) < binarray.length ? binarray[i + 2 >> 2] : 0;
-      triplet = (((bin >> 8 * (3 - i % 4)) & 0xFF) << 16) |
-          (((bin2 >> 8 * (3 - (i + 1) % 4)) & 0xFF) << 8) |
-          ((bin3 >> 8 * (3 - (i + 2) % 4)) & 0xFF);
+      triplet =
+          (((bin >> 8 * (3 - i % 4)) & 0xFF) << 16) | (((bin2 >> 8 * (3 - (i + 1) % 4)) & 0xFF) << 8) | ((bin3 >> 8 * (3 - (i + 2) % 4)) & 0xFF);
       for (int j = 0; j < 4; j++) {
         if (i * 8 + j * 6 > binarray.length * 32) {
           str += "=";

@@ -6,8 +6,7 @@ import 'package:xml/xml.dart';
 
 class VCardTemp extends PluginClass {
   StanzaBuilder _buildIq(String type, String jid, [xml.XmlElement vCardEl]) {
-    StanzaBuilder iq =
-        Strophe.$iq(jid != null ? {'type': type, 'to': jid} : {'type': type});
+    StanzaBuilder iq = Strophe.$iq(jid != null ? {'type': type, 'to': jid} : {'type': type});
 
     if (vCardEl != null) {
       iq.cnode(vCardEl);
@@ -29,8 +28,7 @@ class VCardTemp extends PluginClass {
          *     If no jid is given, this function retrieves the current user's vcard.
          * */
   get(Function handlerCb, String jid, Function errorCb) {
-    var iq =
-        _buildIq("get", jid ?? Strophe.getBareJidFromJid(this.connection.jid));
+    var iq = _buildIq("get", jid ?? Strophe.getBareJidFromJid(this.connection.jid));
     return this.connection.sendIQ(iq.tree(), handlerCb, errorCb);
   }
 
@@ -39,8 +37,7 @@ class VCardTemp extends PluginClass {
          */
   set(Function handlerCb, VCardEl vCardEl, String jid, Function errorCb) {
     if (vCardEl == null) return null;
-    StanzaBuilder iq = _buildIq("set",
-        jid ?? Strophe.getBareJidFromJid(this.connection.jid), vCardEl.tree());
+    StanzaBuilder iq = _buildIq("set", jid ?? Strophe.getBareJidFromJid(this.connection.jid), vCardEl.tree());
     return this.connection.sendIQ(iq.tree(), handlerCb, errorCb);
   }
 }
@@ -62,6 +59,7 @@ class VCardEl {
   String DESC = '';
   String EMAIL = '';
   List<VCardElAddr> _addresses = [];
+
   List<VCardElAddr> get addresses {
     return _addresses;
   }
@@ -102,49 +100,49 @@ class VCardEl {
     JABBERID = jabberdId ?? '';
     DESC = desc ?? '';
   }
+
   XmlElement tree() {
-    StanzaBuilder build =
-        Strophe.$build("vCard", {'xmlns': Strophe.NS['VCARD']})
-            .c('FN')
-            .t(FN)
-            .up()
-            .c('N')
-            .c('FAMILY')
-            .t(FAMILY)
-            .up()
-            .c('GIVEN')
-            .t(GIVEN)
-            .up()
-            .c('MIDDLE')
-            .t(MIDDLE)
-            .up()
-            .up()
-            .c('NICKNAME')
-            .t(NICKNAME)
-            .up()
-            .c('URL')
-            .t(URL)
-            .up()
-            .c('EMAIL')
-            .t(EMAIL)
-            .up()
-            .c('BDAY')
-            .t(BDAY)
-            .up()
-            .c('ORG')
-            .c('ORGNAME')
-            .t(ORGNAME)
-            .up()
-            .c('ORGUNIT')
-            .t(ORGUNIT)
-            .up()
-            .up()
-            .c('TITLE')
-            .t(TITLE)
-            .up()
-            .c('ROLE')
-            .t(ROLE)
-            .up();
+    StanzaBuilder build = Strophe.$build("vCard", {'xmlns': Strophe.NS['VCARD']})
+        .c('FN')
+        .t(FN)
+        .up()
+        .c('N')
+        .c('FAMILY')
+        .t(FAMILY)
+        .up()
+        .c('GIVEN')
+        .t(GIVEN)
+        .up()
+        .c('MIDDLE')
+        .t(MIDDLE)
+        .up()
+        .up()
+        .c('NICKNAME')
+        .t(NICKNAME)
+        .up()
+        .c('URL')
+        .t(URL)
+        .up()
+        .c('EMAIL')
+        .t(EMAIL)
+        .up()
+        .c('BDAY')
+        .t(BDAY)
+        .up()
+        .c('ORG')
+        .c('ORGNAME')
+        .t(ORGNAME)
+        .up()
+        .c('ORGUNIT')
+        .t(ORGUNIT)
+        .up()
+        .up()
+        .c('TITLE')
+        .t(TITLE)
+        .up()
+        .c('ROLE')
+        .t(ROLE)
+        .up();
     addresses.forEach((VCardElAddr addr) {
       if (addr != null) {
         addr.tree().children.forEach((XmlNode elem) {
@@ -152,22 +150,7 @@ class VCardEl {
         });
       }
     });
-    build
-        .c('EMAIL')
-        .c('INTERNET')
-        .t(EMAIL)
-        .up()
-        .c('PREF')
-        .t(EMAIL)
-        .up()
-        .c('USERID')
-        .t(USERID)
-        .up()
-        .up()
-        .c('JABBERID')
-        .t(JABBERID)
-        .c('DESC')
-        .t(DESC);
+    build.c('EMAIL').c('INTERNET').t(EMAIL).up().c('PREF').t(EMAIL).up().c('USERID').t(USERID).up().up().c('JABBERID').t(JABBERID).c('DESC').t(DESC);
     print(build.tree());
     return build.tree();
   }
@@ -185,6 +168,7 @@ class VCardElAddr {
   String PCODE = '';
   String CTRY = '';
   String typeAddr;
+
   VCardElAddr(this.typeAddr,
       {String voiceNum,
       String faxNum,
@@ -207,6 +191,7 @@ class VCardElAddr {
     PCODE = pCode ?? '';
     CTRY = country ?? '';
   }
+
   XmlElement tree() {
     return Strophe.$build('addr', {})
         .c('TEL')

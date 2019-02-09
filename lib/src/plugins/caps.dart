@@ -8,6 +8,7 @@ import 'package:strophe/src/sha1.dart';
 class CapsPlugin extends PluginClass {
   String _hash = 'sha-1';
   String _node = 'http://strophe.im/strophejs/';
+
   init(StropheConnection c) {
     this.connection = c;
     Strophe.addNamespace('CAPS', "http://jabber.org/protocol/caps");
@@ -42,12 +43,7 @@ class CapsPlugin extends PluginClass {
     } else {
       node = this._node;
     }
-    return Strophe.$build("c", {
-      'xmlns': Strophe.NS['CAPS'],
-      'hash': this._hash,
-      'node': node,
-      'ver': await generateVerificationString()
-    });
+    return Strophe.$build("c", {'xmlns': Strophe.NS['CAPS'], 'hash': this._hash, 'node': node, 'ver': await generateVerificationString()});
   }
 
   propertySort(List<Map<String, String>> array, String property) {
@@ -74,15 +70,7 @@ class CapsPlugin extends PluginClass {
     propertySort(ids, "type");
     propertySort(ids, "lang");
     ids.forEach((Map<String, String> id) {
-      S += "" +
-          id['category'] +
-          "/" +
-          id['type'] +
-          "/" +
-          id['lang'] +
-          "/" +
-          id['name'] +
-          "<";
+      S += "" + id['category'] + "/" + id['type'] + "/" + id['lang'] + "/" + id['name'] + "<";
     });
     features.sort();
     for (int _k = 0, _len2 = features.length; _k < _len2; _k++) {

@@ -49,29 +49,25 @@ class StropheWebSocket extends ServiceType {
     //connection.service = new_service;
     //}
   }
-/** PrivateFunction: _buildStream
-     *  _Private_ helper function to generate the <stream> start tag for WebSockets
-     *
-     *  Returns:
-     *    A Strophe.Builder with a <stream> element.
-     */
+
+  /// PrivateFunction: _buildStream
+  ///  _Private_ helper function to generate the <stream> start tag for WebSockets
+  ///
+  ///  Returns:
+  ///    A Strophe.Builder with a <stream> element.
+  ///
   StanzaBuilder _buildStream() {
-    return Strophe.$build("open", {
-      "xmlns": Strophe.NS['FRAMING'],
-      "to": this._conn.domain,
-      "version": '1.0'
-    });
+    return Strophe.$build("open", {"xmlns": Strophe.NS['FRAMING'], "to": this._conn.domain, "version": '1.0'});
   }
 
-  /** PrivateFunction: _check_streamerror
-     * _Private_ checks a message for stream:error
-     *
-     *  Parameters:
-     *    (Strophe.Request) bodyWrap - The received stanza.
-     *    connectstatus - The ConnectStatus that will be set on error.
-     *  Returns:
-     *     true if there was a streamerror, false otherwise.
-     */
+  /// PrivateFunction: _check_streamerror
+  /// _Private_ checks a message for stream:error
+  ///
+  /// Parameters:
+  /// (Strophe.Request) bodyWrap - The received stanza.
+  /// connectstatus - The ConnectStatus that will be set on error.
+  /// Returns:
+  /// true if there was a streamerror, false otherwise.
   bool _checkStreamError(xml.XmlNode bodyWrapNode, int connectstatus) {
     Iterable<xml.XmlElement> errors;
     xml.XmlElement bodyWrap;
@@ -126,12 +122,11 @@ class StropheWebSocket extends ServiceType {
     return true;
   }
 
-  /** PrivateFunction: _reset
-     *  Reset the connection.
-     *
-     *  This function is called by the reset function of the Strophe Connection.
-     *  Is not needed by WebSockets.
-     */
+  /// PrivateFunction: _reset
+  /// Reset the connection.
+  ///
+  /// This function is called by the reset function of the Strophe Connection.
+  /// Is not needed by WebSockets.
   reset() {
     this._reset();
   }
@@ -140,12 +135,11 @@ class StropheWebSocket extends ServiceType {
     return;
   }
 
-  /** PrivateFunction: _connect
-     *  _Private_ function called by Strophe.Connection.connect
-     *
-     *  Creates a WebSocket for a connection and assigns Callbacks to it.
-     *  Does nothing if there already is a WebSocket.
-     */
+  /// PrivateFunction: _connect
+  /// _Private_ function called by Strophe.Connection.connect
+  ///
+  /// Creates a WebSocket for a connection and assigns Callbacks to it.
+  /// Does nothing if there already is a WebSocket.
   connect([int wait, int hold, String route]) {
     this._connect();
   }
@@ -155,11 +149,9 @@ class StropheWebSocket extends ServiceType {
     this._disconnect();
     if (this.socketListen == null || this.socket == null) {
       // Create the new WebSocket
-      WebSocket.connect(this._conn.service, protocols: ['xmpp'])
-          .then((WebSocket socket) {
+      WebSocket.connect(this._conn.service, protocols: ['xmpp']).then((WebSocket socket) {
         this.socket = socket;
-        this.socketListen = this.socket.listen(this._connectCbWrapper,
-            onError: this._onError, onDone: this._onClose);
+        this.socketListen = this.socket.listen(this._connectCbWrapper, onError: this._onError, onDone: this._onClose);
         this._onOpen();
       }).catchError((e) {
         this._conn.connexionError("impossible de joindre le serveur XMPP : $e");
@@ -167,14 +159,13 @@ class StropheWebSocket extends ServiceType {
     }
   }
 
-  /** PrivateFunction: _connect_cb
-     *  _Private_ function called by Strophe.Connection._connect_cb
-     *
-     * checks for stream:error
-     *
-     *  Parameters:
-     *    (Strophe.Request) bodyWrap - The received stanza.
-     */
+  /// PrivateFunction: _connect_cb
+  /// _Private_ function called by Strophe.Connection._connect_cb
+  ///
+  /// checks for stream:error
+  ///
+  /// Parameters:
+  /// (Strophe.Request) bodyWrap - The received stanza.
   connectCb(bodyWrap) {
     this._connectCb(bodyWrap);
   }
@@ -186,14 +177,13 @@ class StropheWebSocket extends ServiceType {
     }
   }
 
-  /** PrivateFunction: _handleStreamStart
-     * _Private_ function that checks the opening <open /> tag for errors.
-     *
-     * Disconnects if there is an error and returns false, true otherwise.
-     *
-     *  Parameters:
-     *    (Node) message - Stanza containing the <open /> tag.
-     */
+  /// PrivateFunction: _handleStreamStart
+  /// _Private_ function that checks the opening <open /> tag for errors.
+  ///
+  /// Disconnects if there is an error and returns false, true otherwise.
+  ///
+  /// Parameters:
+  /// (Node) message - Stanza containing the <open /> tag.
   bool _handleStreamStart(xml.XmlDocument message) {
     String error = "";
 
@@ -220,12 +210,11 @@ class StropheWebSocket extends ServiceType {
     return true;
   }
 
-  /** PrivateFunction: _connect_cb_wrapper
-     * _Private_ function that handles the first connection messages.
-     *
-     * On receiving an opening stream tag this callback replaces itself with the real
-     * message handler. On receiving a stream error the connection is terminated.
-     */
+  /// PrivateFunction: _connect_cb_wrapper
+  /// _Private_ function that handles the first connection messages.
+  ///
+  /// On receiving an opening stream tag this callback replaces itself with the real
+  /// message handler. On receiving a stream error the connection is terminated.
   void _connectCbWrapper(message) {
     try {
       message = message as String;
@@ -233,8 +222,7 @@ class StropheWebSocket extends ServiceType {
       message = message.toString();
     }
     if (message == null || message.isEmpty) return;
-    if (message.trim().indexOf("<open ") == 0 ||
-        message.trim().indexOf("<?xml") == 0) {
+    if (message.trim().indexOf("<open ") == 0 || message.trim().indexOf("<?xml") == 0) {
       // Strip the XML Declaration, if there is one
       String data = message.replaceAll(new RegExp(r"^(<\?.*?\?>\s*)*"), "");
       if (data == '') return;
@@ -252,17 +240,14 @@ class StropheWebSocket extends ServiceType {
       // <close xmlns="urn:ietf:params:xml:ns:xmpp-framing />
       this._conn.rawInput(message);
       this._conn.xmlInput(xml.parse(message).rootElement);
-      String seeUri =
-          xml.parse(message).rootElement.getAttribute("see-other-uri");
+      String seeUri = xml.parse(message).rootElement.getAttribute("see-other-uri");
       if (seeUri != null && seeUri.isNotEmpty) {
-        this._conn.changeConnectStatus(Strophe.Status['REDIRECT'],
-            "Received see-other-uri, resetting connection");
+        this._conn.changeConnectStatus(Strophe.Status['REDIRECT'], "Received see-other-uri, resetting connection");
         this._conn.reset();
         this._conn.service = seeUri;
         this._connect();
       } else {
-        this._conn.changeConnectStatus(
-            Strophe.Status['CONNFAIL'], "Received closing stream");
+        this._conn.changeConnectStatus(Strophe.Status['CONNFAIL'], "Received closing stream");
         this._conn.doDisconnect();
       }
     } else {
@@ -273,22 +258,20 @@ class StropheWebSocket extends ServiceType {
     }
   }
 
-  /** PrivateFunction: _disconnect
-     *  _Private_ function called by Strophe.Connection.disconnect
-     *
-     *  Disconnects and sends a last stanza if one is given
-     *
-     *  Parameters:
-     *    (Request) pres - This stanza will be sent before disconnecting.
-     */
+  /// PrivateFunction: _disconnect
+  /// _Private_ function called by Strophe.Connection.disconnect
+  ///
+  /// Disconnects and sends a last stanza if one is given
+  ///
+  /// Parameters:
+  /// (Request) pres - This stanza will be sent before disconnecting.
   void _disconnect([StanzaBuilder pres]) {
-    if (this.socket != null && this.socket.readyState != WebSocket.CLOSED) {
+    if (this.socket != null && this.socket.readyState != WebSocket.closed) {
       if (pres != null) {
         this._conn.send(pres.tree());
       }
 
-      StanzaBuilder close =
-          Strophe.$build("close", {"xmlns": Strophe.NS['FRAMING']});
+      StanzaBuilder close = Strophe.$build("close", {"xmlns": Strophe.NS['FRAMING']});
       this._conn.xmlOutput(close.tree());
       String closeString = Strophe.serialize(close.tree());
       this._conn.rawOutput(closeString);
@@ -301,11 +284,10 @@ class StropheWebSocket extends ServiceType {
     }
   }
 
-  /** PrivateFunction: _doDisconnect
-     *  _Private_ function to disconnect.
-     *
-     *  Just closes the Socket for WebSockets
-     */
+  /// PrivateFunction: _doDisconnect
+  /// _Private_ function to disconnect.
+  ///
+  /// Just closes the Socket for WebSockets
   void doDisconnect() {
     this._doDisconnect();
   }
@@ -314,19 +296,17 @@ class StropheWebSocket extends ServiceType {
     this._closeSocket();
   }
 
-  /** PrivateFunction _streamWrap
-     *  _Private_ helper function to wrap a stanza in a <stream> tag.
-     *  This is used so Strophe can process stanzas from WebSockets like BOSH
-     */
+  /// PrivateFunction _streamWrap
+  /// _Private_ helper function to wrap a stanza in a <stream> tag.
+  /// This is used so Strophe can process stanzas from WebSockets like BOSH
   String _streamWrap(String stanza) {
     return "<wrapper>" + stanza + '</wrapper>';
   }
 
-  /** PrivateFunction: _closeSocket
-     *  _Private_ function to close the WebSocket.
-     *
-     *  Closes the socket if it is still open and deletes it
-     */
+  /// PrivateFunction: _closeSocket
+  /// _Private_ function to close the WebSocket.
+  ///
+  /// Closes the socket if it is still open and deletes it
   void _closeSocket() {
     if (this.socket != null) {
       try {
@@ -339,12 +319,11 @@ class StropheWebSocket extends ServiceType {
     }
   }
 
-  /** PrivateFunction: _emptyQueue
-     * _Private_ function to check if the message queue is empty.
-     *
-     *  Returns:
-     *    True, because WebSocket messages are send immediately after queueing.
-     */
+  /// PrivateFunction: _emptyQueue
+  /// _Private_ function to check if the message queue is empty.
+  ///
+  /// Returns:
+  /// True, because WebSocket messages are send immediately after queueing.
   bool emptyQueue() {
     return this._emptyQueue();
   }
@@ -353,11 +332,10 @@ class StropheWebSocket extends ServiceType {
     return true;
   }
 
-  /** PrivateFunction: _onClose
-     * _Private_ function to handle websockets closing.
-     *
-     * Nothing to do here for WebSockets
-     */
+  /// PrivateFunction: _onClose
+  /// _Private_ function to handle websockets closing.
+  ///
+  /// Nothing to do here for WebSockets
   void _onClose() {
     if (this._conn.connected && !this._conn.disconnecting) {
       Strophe.error("Websocket closed unexpectedly");
@@ -368,52 +346,46 @@ class StropheWebSocket extends ServiceType {
       // dispatch a CONNFAIL status update to be consistent with the
       // behavior on other browsers.
       Strophe.error("Websocket closed unexcectedly");
-      this._conn.changeConnectStatus(Strophe.Status['CONNFAIL'],
-          "The WebSocket connection could not be established or was disconnected.");
+      this._conn.changeConnectStatus(Strophe.Status['CONNFAIL'], "The WebSocket connection could not be established or was disconnected.");
       this._conn.doDisconnect();
     } else {
       Strophe.info("Websocket closed");
     }
   }
 
-  /** PrivateFunction: _onDisconnectTimeout
-     *  _Private_ timeout handler for handling non-graceful disconnection.
-     *
-     *  This does nothing for WebSockets
-     */
+  /// PrivateFunction: _onDisconnectTimeout
+  /// _Private_ timeout handler for handling non-graceful disconnection.
+  ///
+  /// This does nothing for WebSockets
   void onDisconnectTimeout() {
     this._onDisconnectTimeout();
   }
 
   void _onDisconnectTimeout() {}
 
-  /** PrivateFunction: _abortAllRequests
-     *  _Private_ helper function that makes sure all pending requests are aborted.
-     */
+  /// PrivateFunction: _abortAllRequests
+  /// _Private_ helper function that makes sure all pending requests are aborted.
   void abortAllRequests() {
     _abortAllRequests();
   }
 
   void _abortAllRequests() {}
 
-  /** PrivateFunction: _onError
-     * _Private_ function to handle websockets errors.
-     *
-     * Parameters:
-     * (Object) error - The websocket error.
-     */
+  /// PrivateFunction: _onError
+  /// _Private_ function to handle websockets errors.
+  ///
+  /// Parameters:
+  /// (Object) error - The websocket error.
   void _onError(Object error) {
     Strophe.error("Websocket error " + error.toString());
-    this._conn.changeConnectStatus(Strophe.Status['CONNFAIL'],
-        "The WebSocket connection could not be established or was disconnected.");
+    this._conn.changeConnectStatus(Strophe.Status['CONNFAIL'], "The WebSocket connection could not be established or was disconnected.");
     this._disconnect();
   }
 
-  /** PrivateFunction: _onIdle
-     *  _Private_ function called by Strophe.Connection._onIdle
-     *
-     *  sends all queued stanzas
-     */
+  /// PrivateFunction: _onIdle
+  /// _Private_ function called by Strophe.Connection._onIdle
+  ///
+  /// sends all queued stanzas
   void onIdle() {
     this._onIdle();
   }
@@ -440,29 +412,28 @@ class StropheWebSocket extends ServiceType {
     }
   }
 
-  /** PrivateFunction: _onMessage
-     * _Private_ function to handle websockets messages.
-     *
-     * This function parses each of the messages as if they are full documents.
-     * [TODO : We may actually want to use a SAX Push parser].
-     *
-     * Since all XMPP traffic starts with
-     *  <stream:stream version='1.0'
-     *                 xml:lang='en'
-     *                 xmlns='jabber:client'
-     *                 xmlns:stream='http://etherx.jabber.org/streams'
-     *                 id='3697395463'
-     *                 from='SERVER'>
-     *
-     * The first stanza will always fail to be parsed.
-     *
-     * Additionally, the seconds stanza will always be <stream:features> with
-     * the stream NS defined in the previous stanza, so we need to 'force'
-     * the inclusion of the NS in this stanza.
-     *
-     * Parameters:
-     * (string) message - The websocket message.
-     */
+  /// PrivateFunction: _onMessage
+  /// _Private_ function to handle websockets messages.
+  ///
+  /// This function parses each of the messages as if they are full documents.
+  /// [TODO : We may actually want to use a SAX Push parser].
+  ///
+  /// Since all XMPP traffic starts with
+  /// <stream:stream version='1.0'
+  /// xml:lang='en'
+  /// xmlns='jabber:client'
+  /// xmlns:stream='http://etherx.jabber.org/streams'
+  /// id='3697395463'
+  /// from='SERVER'>
+  ///
+  /// The first stanza will always fail to be parsed.
+  ///
+  /// Additionally, the seconds stanza will always be <stream:features> with
+  /// the stream NS defined in the previous stanza, so we need to 'force'
+  /// the inclusion of the NS in this stanza.
+  ///
+  /// Parameters:
+  /// (string) message - The websocket message.
   void _onMessage(dynamic msg) {
     String message = msg as String;
     xml.XmlDocument elem;
@@ -492,9 +463,7 @@ class StropheWebSocket extends ServiceType {
 
     //handle unavailable presence stanza before disconnecting
     xml.XmlElement firstChild = elem.firstChild;
-    if (this._conn.disconnecting &&
-        firstChild.name.qualified == "presence" &&
-        firstChild.getAttribute("type") == "unavailable") {
+    if (this._conn.disconnecting && firstChild.name.qualified == "presence" && firstChild.getAttribute("type") == "unavailable") {
       this._conn.xmlInput(elem.root);
       this._conn.rawInput(Strophe.serialize(elem));
       // if we are already disconnecting we will ignore the unavailable stanza and
@@ -504,11 +473,10 @@ class StropheWebSocket extends ServiceType {
     this._conn.dataRecv(elem.rootElement, message);
   }
 
-  /** PrivateFunction: _onOpen
-     * _Private_ function to handle websockets connection setup.
-     *
-     * The opening stream tag is sent here.
-     */
+  /// PrivateFunction: _onOpen
+  /// _Private_ function to handle websockets connection setup.
+  ///
+  /// The opening stream tag is sent here.
   _onOpen() {
     StanzaBuilder start = this._buildStream();
     this._conn.xmlOutput(start.tree());
@@ -518,17 +486,16 @@ class StropheWebSocket extends ServiceType {
     if (this.socket != null) this.socket.add(startString);
   }
 
-  /** PrivateFunction: _reqToData
-     * _Private_ function to get a stanza out of a request.
-     *
-     * WebSockets don't use requests, so the passed argument is just returned.
-     *
-     *  Parameters:
-     *    (Object) stanza - The stanza.
-     *
-     *  Returns:
-     *    The stanza that was passed.
-     */
+  /// PrivateFunction: _reqToData
+  /// _Private_ function to get a stanza out of a request.
+  ///
+  /// WebSockets don't use requests, so the passed argument is just returned.
+  ///
+  /// Parameters:
+  /// (Object) stanza - The stanza.
+  ///
+  /// Returns:
+  /// The stanza that was passed.
   xml.XmlElement reqToData(stanza) {
     return this._reqToData(stanza);
   }
@@ -540,11 +507,10 @@ class StropheWebSocket extends ServiceType {
     return stanza as xml.XmlElement;
   }
 
-  /** PrivateFunction: _send
-     *  _Private_ part of the Connection.send function for WebSocket
-     *
-     * Just flushes the messages that are in the queue
-     */
+  /// PrivateFunction: _send
+  /// _Private_ part of the Connection.send function for WebSocket
+  ///
+  /// Just flushes the messages that are in the queue
   send() {
     this._send();
   }
@@ -553,10 +519,9 @@ class StropheWebSocket extends ServiceType {
     this._conn.flush();
   }
 
-  /** PrivateFunction: _sendRestart
-     *
-     *  Send an xmpp:restart stanza.
-     */
+  /// PrivateFunction: _sendRestart
+  ///
+  /// Send an xmpp:restart stanza.
   sendRestart() {
     this._sendRestart();
   }

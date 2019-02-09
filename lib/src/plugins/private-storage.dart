@@ -9,35 +9,28 @@ import 'package:xml/xml.dart' as xml;
  * Copyright (c) Markus Kohlhase, 2011
  */
 
-/**
-* File: strophe.private.js
-* A Strophe plugin for XMPP Private XML Storage ( http://xmpp.org/extensions/xep-0049.html )
-*/
+/// File: strophe.private.js
+/// A Strophe plugin for XMPP Private XML Storage ( http://xmpp.org/extensions/xep-0049.html )
 class PrivateStorage extends PluginClass {
   // called by the Strophe.Connection constructor
-
   init(StropheConnection conn) {
     this.connection = conn;
     Strophe.addNamespace('PRIVATE', "jabber:iq:private");
   }
 
-  /**
-   * Function: set
-   *
-   * Parameters:
-   * (String) tag - the tag name
-   * (String) ns  - the namespace
-   * (XML) data   - the data you want to save
-   * (Function) success - Callback function on success
-   * (Function) error - Callback function on error
-   */
-
+  /// Function: set
+  ///
+  /// Parameters:
+  /// (String) tag - the tag name
+  /// (String) ns  - the namespace
+  /// (XML) data   - the data you want to save
+  /// (Function) success - Callback function on success
+  /// (Function) error - Callback function on error
   set(String tag, String ns, data, [Function success, Function error]) {
     String id = this.connection.getUniqueId('saveXML');
     ns = ns ?? 'namespace';
     tag = tag ?? 'tag';
-    StanzaBuilder iq = Strophe.$iq({'type': 'set', 'id': id}).c(
-        'query', {'xmlns': Strophe.NS['PRIVATE']}).c(tag, {'xmlns': ns});
+    StanzaBuilder iq = Strophe.$iq({'type': 'set', 'id': id}).c('query', {'xmlns': Strophe.NS['PRIVATE']}).c(tag, {'xmlns': ns});
 
     xml.XmlNode d = this._transformData(data);
 
@@ -48,22 +41,18 @@ class PrivateStorage extends PluginClass {
     this.connection.sendIQ(iq.tree(), success, error);
   }
 
-  /**
-   * Function: get
-   *
-   * Parameters:
-   * (String) tag - the tag name
-   * (String) ns  - the namespace
-   * (Function) success - Callback function on success
-   * (Function) error - Callback function on error
-   */
-
+  /// Function: get
+  ///
+  /// Parameters:
+  /// (String) tag - the tag name
+  /// (String) ns  - the namespace
+  /// (Function) success - Callback function on success
+  /// (Function) error - Callback function on error
   get(String tag, String ns, Function success, [Function error]) {
     String id = this.connection.getUniqueId('loadXML');
     ns = ns ?? 'namespace';
     tag = tag ?? 'tag';
-    StanzaBuilder iq = Strophe.$iq({'type': 'get', 'id': id}).c(
-        'query', {'xmlns': Strophe.NS['PRIVATE']}).c(tag, {'xmlns': ns});
+    StanzaBuilder iq = Strophe.$iq({'type': 'get', 'id': id}).c('query', {'xmlns': Strophe.NS['PRIVATE']}).c(tag, {'xmlns': ns});
 
     this.connection.sendIQ(iq.tree(), (xml.XmlElement iq) {
       xml.XmlNode data = iq;
@@ -79,9 +68,7 @@ class PrivateStorage extends PluginClass {
     }, error);
   }
 
-  /**
-   * PrivateFunction: _transformData
-   */
+  /// PrivateFunction: _transformData
   xml.XmlNode _transformData(c) {
     switch (c.runtimeType.toString()) {
       case "num":
@@ -104,16 +91,13 @@ class PrivateStorage extends PluginClass {
     return null;
   }
 
-  /**
-   * PrivateFunction: _textToXml
-   *
-   * Parameters:
-   * (String) text  - XML String
-   *
-   * Returns:
-   * (Object) dom - DOM Object
-   */
-
+  /// PrivateFunction: _textToXml
+  ///
+  /// Parameters:
+  /// (String) text  - XML String
+  ///
+  /// Returns:
+  /// (Object) dom - DOM Object
   xml.XmlElement _textToXml(String text) {
     try {
       return xml.parse(text).rootElement;
@@ -121,30 +105,25 @@ class PrivateStorage extends PluginClass {
       return xml.parse('<data>$text</data>').rootElement;
     }
   }
-  /**
-   * PrivateFunction: _isNode
-   *
-   * Parameters:
-   * ( Object ) obj - The object to test
-   *
-   * Returns:
-   * True if it is a DOM node
-   */
 
+  /// PrivateFunction: _isNode
+  ///
+  /// Parameters:
+  /// ( Object ) obj - The object to test
+  ///
+  /// Returns:
+  /// True if it is a DOM node
   bool _isNode(obj) {
     return obj is xml.XmlNode;
   }
 
-  /**
-   * PrivateFunction: _isElement
-   *
-   * Parameters:
-   * ( Object ) obj - The object to test
-   *
-   * Returns:
-   * True if it is a DOM element.
-   */
-
+  /// PrivateFunction: _isElement
+  ///
+  /// Parameters:
+  /// ( Object ) obj - The object to test
+  ///
+  /// Returns:
+  /// True if it is a DOM element.
   bool _isElement(obj) {
     return obj is xml.XmlElement;
   }

@@ -4,8 +4,7 @@ import 'package:strophe/src/core.dart';
 import 'package:strophe/src/enums.dart';
 import 'package:strophe/src/plugins/plugins.dart';
 import 'package:strophe/src/utils.dart';
-import 'package:xml/xml/nodes/document.dart';
-import 'package:xml/xml/nodes/element.dart';
+import 'package:xml/xml.dart';
 
 /*
 This library is free software; you can redistribute it and/or modify it
