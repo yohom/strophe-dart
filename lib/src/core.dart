@@ -22,8 +22,8 @@ class Strophe {
   /// This defaults to 0.1, and with default wait, 6 seconds.
   static const num TIMEOUT = 1.1;
   static const num SECONDARY_TIMEOUT = 0.1;
-  static Map<String, int> Status = ConnexionStatus;
-  static Map<String, String> NS = NAMESPACE;
+  static Map<String, int> Status = Map.from(ConnexionStatus);
+  static Map<String, String> NS = Map.from(NAMESPACE);
   static const Map<String, String> ErrorCondition = ERRORSCONDITIONS;
   static const Map<String, int> LogLevel = LOGLEVEL;
   static const Map<String, int> ElementType = ELEMENTTYPE;
