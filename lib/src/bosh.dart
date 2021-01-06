@@ -122,8 +122,8 @@ class StropheBosh extends ServiceType {
     var body = this._buildBody().attrs({
       'to': this._conn.domain,
       "xml:lang": "en",
-      'wait': this.wait,
-      'hold': this.hold,
+      'wait': this.wait.toString(),
+      'hold': this.hold.toString(),
       'content': "text/xml; charset=utf-8",
       'ver': "1.6",
       "xmpp:version": "1.0",
@@ -555,7 +555,9 @@ class StropheBosh extends ServiceType {
       return;
     }
     int reqStatus = this._getRequestStatus(req);
-    this.lastResponseHeaders = req.response.headers;
+    this.lastResponseHeaders = req.response?.headers;
+    this.disconnecting =
+        false; // TDOO: this is hardcode fix and disconnecting should actually be used
     if (this.disconnecting && reqStatus >= 400) {
       this._hitError(reqStatus);
       this._callProtocolErrorHandlers(req);
@@ -715,7 +717,7 @@ class StropheBosh extends ServiceType {
 
   _sendFunc(StropheRequest req) {
     String contentType;
-    Map<String, dynamic> map;
+    Map<String, String> map;
     http.Request request;
     try {
       contentType =
@@ -724,7 +726,7 @@ class StropheBosh extends ServiceType {
       request.persistentConnection = this._conn.options['sync'] ? false : true;
       map = {"Content-Type": contentType};
       if (this._conn.options['withCredentials']) {
-        map['withCredentials'] = true;
+        map['withCredentials'] = 'true';
       }
     } catch (e2) {
       Strophe.error("XHR open failed: " + e2.toString());
@@ -737,7 +739,7 @@ class StropheBosh extends ServiceType {
       return;
     }
     req.date = new DateTime.now().millisecondsSinceEpoch;
-    if (this._conn.options['customHeaders']) {
+    if (this._conn.options['customHeaders'] != null) {
       var headers = this._conn.options['customHeaders'];
       for (var header in headers) {
         map[header] = headers[header];
@@ -745,9 +747,30 @@ class StropheBosh extends ServiceType {
     }
 
     request.bodyFields = map;
-    req.xhr.send(request).then((http.StreamedResponse response) {
-      req.response = response as http.Response;
-    }).catchError(() {});
+    // request.headers = map;
+    req.xhr
+        .post(
+      Uri.parse(this._conn.service),
+      headers: map,
+      body: req.data,
+      encoding: Encoding.getByName('utf-8'),
+    )
+        .then(
+      (value) {
+        print('The value: $value');
+      },
+    );
+    req.xhr.send(request).then(
+      (http.StreamedResponse response) async {
+        print('The raw response: $response');
+        print('The raw status code: ${response.statusCode}');
+        final respStr = await response.stream.bytesToString();
+        print(respStr);
+        req.response = await http.Response.fromStream(response);
+      },
+    ).catchError((e) {
+      print('The raw error: $e');
+    });
   }
 
   /** PrivateFunction: _removeRequest
