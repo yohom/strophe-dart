@@ -27,9 +27,11 @@ class DiscoPlugin extends PluginClass {
     this._features = [];
     this._items = [];
     // disco info
-    conn.addHandler(this._onDiscoInfo, Strophe.NS['DISCO_INFO'], 'iq', 'get', null, null);
+    conn.addHandler(
+        this._onDiscoInfo, Strophe.NS['DISCO_INFO'], 'iq', 'get', null, null);
     // disco items
-    conn.addHandler(this._onDiscoItems, Strophe.NS['DISCO_ITEMS'], 'iq', 'get', null, null);
+    conn.addHandler(
+        this._onDiscoItems, Strophe.NS['DISCO_ITEMS'], 'iq', 'get', null, null);
   }
 
   /// Function: addIdentity
@@ -42,7 +44,8 @@ class DiscoPlugin extends PluginClass {
   ///
   /// Returns:
   /// Boolean
-  bool addIdentity(String category, String type, [String name = '', String lang = '']) {
+  bool addIdentity(String category, String type,
+      [String name = '', String lang = '']) {
     for (int i = 0; i < this._identities.length; i++) {
       if (this._identities[i]['category'] == category &&
           this._identities[i]['type'] == type &&
@@ -51,7 +54,9 @@ class DiscoPlugin extends PluginClass {
         return false;
       }
     }
-    this._identities.add({'category': category, 'type': type, 'name': name, 'lang': lang});
+    this
+        ._identities
+        .add({'category': category, 'type': type, 'name': name, 'lang': lang});
     return true;
   }
 
@@ -99,7 +104,9 @@ class DiscoPlugin extends PluginClass {
   /// boolean
   addItem(String jid, String name, String node, [Function callback]) {
     if (node != null && node.isNotEmpty && callback == null) return false;
-    this._items.add({'jid': jid, 'name': name, 'node': node, 'call_back': callback});
+    this
+        ._items
+        .add({'jid': jid, 'name': name, 'node': node, 'call_back': callback});
     return true;
   }
 
@@ -110,11 +117,14 @@ class DiscoPlugin extends PluginClass {
   /// (Function) call_back
   /// (String) jid
   /// (String) node
-  info(String jid, [String node, Function success, Function error, int timeout]) {
+  info(String jid,
+      [String node, Function success, Function error, int timeout]) {
     Map<String, String> attrs = {'xmlns': Strophe.NS['DISCO_INFO']};
     if (node != null && node.isNotEmpty) attrs['node'] = node;
 
-    StanzaBuilder info = Strophe.$iq({'from': this.connection.jid, 'to': jid, 'type': 'get'}).c('query', attrs);
+    StanzaBuilder info =
+        Strophe.$iq({'from': this.connection.jid, 'to': jid, 'type': 'get'})
+            .c('query', attrs);
     this.connection.sendIQ(info.tree(), success, error, timeout);
   }
 
@@ -125,16 +135,20 @@ class DiscoPlugin extends PluginClass {
   /// (Function) call_back
   /// (String) jid
   /// (String) node
-  items(String jid, [String node, Function success, Function error, int timeout]) {
+  items(String jid,
+      [String node, Function success, Function error, int timeout]) {
     Map<String, String> attrs = {'xmlns': Strophe.NS['DISCO_ITEMS']};
     if (node != null && node.isNotEmpty) attrs['node'] = node;
 
-    StanzaBuilder items = Strophe.$iq({'from': this.connection.jid, 'to': jid, 'type': 'get'}).c('query', attrs);
+    StanzaBuilder items =
+        Strophe.$iq({'from': this.connection.jid, 'to': jid, 'type': 'get'})
+            .c('query', attrs);
     this.connection.sendIQ(items.tree(), success, error, timeout);
   }
 
   /// PrivateFunction: _buildIQResult
-  StanzaBuilder _buildIQResult(XmlElement stanza, Map<String, String> queryAttrs) {
+  StanzaBuilder _buildIQResult(
+      XmlElement stanza, Map<String, String> queryAttrs) {
     String id = stanza.getAttribute('id');
     String from = stanza.getAttribute('from');
     StanzaBuilder iqresult = Strophe.$iq({'type': 'result', id: id});
@@ -149,16 +163,22 @@ class DiscoPlugin extends PluginClass {
   /// PrivateFunction: _onDiscoInfo
   /// Called when receive info request
   _onDiscoInfo(XmlElement stanza) {
-    String node = stanza.findAllElements('query').toList()[0].getAttribute('node');
+    String node =
+        stanza.findAllElements('query').toList()[0].getAttribute('node');
     Map<String, String> attrs = {'xmlns': Strophe.NS['DISCO_INFO']};
     if (node != null && node.isNotEmpty) {
       attrs['node'] = node;
     }
     StanzaBuilder iqresult = this._buildIQResult(stanza, attrs);
     for (int i = 0; i < this._identities.length; i++) {
-      attrs = {'category': this._identities[i]['category'], 'type': this._identities[i]['type']};
-      if (this._identities[i]['name'] != null) attrs['name'] = this._identities[i]['name'];
-      if (this._identities[i]['lang'] != null) attrs['xml:lang'] = this._identities[i]['lang'];
+      attrs = {
+        'category': this._identities[i]['category'],
+        'type': this._identities[i]['type']
+      };
+      if (this._identities[i]['name'] != null)
+        attrs['name'] = this._identities[i]['name'];
+      if (this._identities[i]['lang'] != null)
+        attrs['xml:lang'] = this._identities[i]['lang'];
       iqresult.c('identity', attrs).up();
     }
     for (int i = 0; i < this._features.length; i++) {
@@ -172,7 +192,8 @@ class DiscoPlugin extends PluginClass {
   /// Called when receive items request
   Future<bool> _onDiscoItems(XmlElement stanza) async {
     Map<String, String> queryAttrs = {'xmlns': Strophe.NS['DISCO_ITEMS']};
-    String node = stanza.findAllElements('query').toList()[0].getAttribute('node');
+    String node =
+        stanza.findAllElements('query').toList()[0].getAttribute('node');
     List items;
     if (node != null && node.isNotEmpty) {
       queryAttrs['node'] = node;

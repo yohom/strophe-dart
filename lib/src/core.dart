@@ -28,7 +28,21 @@ class Strophe {
   static const Map<String, int> LogLevel = LOGLEVEL;
   static const Map<String, int> ElementType = ELEMENTTYPE;
   static Map<String, dynamic> XHTML = {
-    "tags": ['a', 'blockquote', 'br', 'cite', 'em', 'img', 'li', 'ol', 'p', 'span', 'strong', 'ul', 'body'],
+    "tags": [
+      'a',
+      'blockquote',
+      'br',
+      'cite',
+      'em',
+      'img',
+      'li',
+      'ol',
+      'p',
+      'span',
+      'strong',
+      'ul',
+      'body'
+    ],
     'attributes': {
       'a': ['href'],
       'blockquote': ['style'],
@@ -79,7 +93,8 @@ class Strophe {
      * XHTML attribute names are case sensitive and must be lower case.
      */
     'validAttribute': (String tag, String attribute) {
-      if (Strophe.XHTML['attributes'][tag] != null && Strophe.XHTML['attributes'][tag].length > 0) {
+      if (Strophe.XHTML['attributes'][tag] != null &&
+          Strophe.XHTML['attributes'][tag].length > 0) {
         for (int i = 0; i < Strophe.XHTML['attributes'][tag].length; i++) {
           if (attribute == Strophe.XHTML['attributes'][tag][i]) {
             return true;
@@ -135,12 +150,14 @@ class Strophe {
       try {
         if (elem.children.elementAt(i) is xml.XmlElement)
           childNode = elem.children.elementAt(i);
-        else if (elem.children.elementAt(i) is xml.XmlDocument) childNode = elem.rootElement.children.elementAt(i);
+        else if (elem.children.elementAt(i) is xml.XmlDocument)
+          childNode = elem.rootElement.children.elementAt(i);
       } catch (e) {
         childNode = null;
       }
       if (childNode == null) continue;
-      if (childNode.nodeType == xml.XmlNodeType.ELEMENT && (elemName == null || isTagEqual(childNode, elemName))) {
+      if (childNode.nodeType == xml.XmlNodeType.ELEMENT &&
+          (elemName == null || isTagEqual(childNode, elemName))) {
         func(childNode);
       }
     }
@@ -214,7 +231,9 @@ class Strophe {
     if (name == null || name.isEmpty || name.trim().length == 0) {
       return null;
     }
-    if (attrs != null && (attrs is! List<List<String>>) && (attrs is! Map<String, dynamic>)) {
+    if (attrs != null &&
+        (attrs is! List<List<String>>) &&
+        (attrs is! Map<String, dynamic>)) {
       return null;
     }
     Map<String, String> attributes = {};
@@ -521,7 +540,12 @@ class Strophe {
       Strophe.fatal(e.stackTrace.toString());
     }
     if (e.toString() != null) {
-      Strophe.fatal("error: " + e.hashCode.toString() + " - " + e.runtimeType.toString() + ": " + e.toString());
+      Strophe.fatal("error: " +
+          e.hashCode.toString() +
+          " - " +
+          e.runtimeType.toString() +
+          ": " +
+          e.toString());
     }
   }
 
@@ -729,22 +753,29 @@ class Strophe {
    *  Returns:
    *    A new Strophe.Handler object.
    */
-  static StanzaHandler Handler(Function handler, String ns, String name, [type, String id, String from, Map options]) {
+  static StanzaHandler Handler(Function handler, String ns, String name,
+      [type, String id, String from, Map options]) {
     if (options != null) {
       options.putIfAbsent('matchBareFromJid', () => false);
       options.putIfAbsent('ignoreNamespaceFragment', () => false);
     } else
       options = {'matchBareFromJid': false, 'ignoreNamespaceFragment': false};
-    StanzaHandler stanzaHandler = StanzaHandler(handler, ns, name, type, id, options);
+    StanzaHandler stanzaHandler =
+        StanzaHandler(handler, ns, name, type, id, options);
     // BBB: Maintain backward compatibility with old `matchBare` option
     if (stanzaHandler.options['matchBare'] != null) {
-      Strophe.warn('The "matchBare" option is deprecated, use "matchBareFromJid" instead.');
-      stanzaHandler.options['matchBareFromJid'] = stanzaHandler.options['matchBare'];
+      Strophe.warn(
+          'The "matchBare" option is deprecated, use "matchBareFromJid" instead.');
+      stanzaHandler.options['matchBareFromJid'] =
+          stanzaHandler.options['matchBare'];
       stanzaHandler.options.remove('matchBare');
     }
 
-    if (stanzaHandler.options['matchBareFromJid'] != null && stanzaHandler.options['matchBareFromJid'] == true) {
-      stanzaHandler.from = (from != null && from.isNotEmpty) ? Strophe.getBareJidFromJid(from) : null;
+    if (stanzaHandler.options['matchBareFromJid'] != null &&
+        stanzaHandler.options['matchBareFromJid'] == true) {
+      stanzaHandler.from = (from != null && from.isNotEmpty)
+          ? Strophe.getBareJidFromJid(from)
+          : null;
     } else {
       stanzaHandler.from = from;
     }

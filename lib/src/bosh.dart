@@ -72,11 +72,13 @@ class StropheBosh extends ServiceType {
    *    A Strophe.Builder with a <body/> element.
    */
   StanzaBuilder _buildBody() {
-    StanzaBuilder bodyWrap = Strophe.$build('body', {'rid': this.rid++, 'xmlns': Strophe.NS['HTTPBIND']});
+    StanzaBuilder bodyWrap = Strophe.$build(
+        'body', {'rid': this.rid++, 'xmlns': Strophe.NS['HTTPBIND']});
     if (this.sid != null) {
       bodyWrap = bodyWrap.attrs({sid: this.sid});
     }
-    if (this._conn.options['keepalive'] && this._conn.sessionCachingSupported()) {
+    if (this._conn.options['keepalive'] &&
+        this._conn.sessionCachingSupported()) {
       this._cacheSession();
     }
     return bodyWrap;
@@ -131,7 +133,8 @@ class StropheBosh extends ServiceType {
     if (route != null && route.isNotEmpty) {
       body.attrs({route: route});
     }
-    StropheRequest req = new StropheRequest(body.tree(), null, body.tree().getAttribute("rid"));
+    StropheRequest req =
+        new StropheRequest(body.tree(), null, body.tree().getAttribute("rid"));
     req.func = this._onRequestStateChange(this._conn.connectCb, req);
     req.origFunc = req.func;
 
@@ -163,11 +166,13 @@ class StropheBosh extends ServiceType {
    *    (Integer) wind - The optional HTTBIND window value.  This is the
    *      allowed range of request ids that are valid.  The default is 5.
    */
-  void attach(String jid, String sid, int rid, Function callback, int wait, int hold, int wind) {
+  void attach(String jid, String sid, int rid, Function callback, int wait,
+      int hold, int wind) {
     this._attach(jid, sid, rid, callback, wait, hold, wind);
   }
 
-  _attach(String jid, String sid, int rid, Function callback, int wait, int hold, int wind) {
+  _attach(String jid, String sid, int rid, Function callback, int wait,
+      int hold, int wind) {
     this._conn.jid = jid;
     this.sid = sid;
     this.rid = rid;
@@ -210,20 +215,27 @@ class StropheBosh extends ServiceType {
   }
 
   _restore(String jid, Function callback, int wait, int hold, int wind) {
-    var session = JsonCodec().decode(SessionStorage.getItem('strophe-bosh-session'));
+    var session =
+        JsonCodec().decode(SessionStorage.getItem('strophe-bosh-session'));
     if (session != null &&
         session.rid &&
         session.sid &&
         session.jid &&
         (jid == null ||
-            Strophe.getBareJidFromJid(session.jid) == Strophe.getBareJidFromJid(jid) ||
+            Strophe.getBareJidFromJid(session.jid) ==
+                Strophe.getBareJidFromJid(jid) ||
             // If authcid is null, then it's an anonymous login, so
             // we compare only the domains:
-            ((Strophe.getNodeFromJid(jid) == null) && (Strophe.getDomainFromJid(session.jid) == jid)))) {
+            ((Strophe.getNodeFromJid(jid) == null) &&
+                (Strophe.getDomainFromJid(session.jid) == jid)))) {
       this._conn.restored = true;
-      this._attach(session.jid, session.sid, session.rid, callback, wait, hold, wind);
+      this._attach(
+          session.jid, session.sid, session.rid, callback, wait, hold, wind);
     } else {
-      throw {'name': "StropheSessionError", 'message': "_restore: no restoreable session."};
+      throw {
+        'name': "StropheSessionError",
+        'message': "_restore: no restoreable session."
+      };
     }
   }
 
@@ -236,8 +248,16 @@ class StropheBosh extends ServiceType {
    */
   void _cacheSession() {
     if (this._conn.authenticated) {
-      if (this._conn.jid != null && this._conn.jid.isNotEmpty && this.rid != null && this.rid != 0 && this.sid != null && this.sid.isNotEmpty) {
-        SessionStorage.setItem('strophe-bosh-session', JsonCodec().encode({'jid': this._conn.jid, 'rid': this.rid, 'sid': this.sid}));
+      if (this._conn.jid != null &&
+          this._conn.jid.isNotEmpty &&
+          this.rid != null &&
+          this.rid != 0 &&
+          this.sid != null &&
+          this.sid.isNotEmpty) {
+        SessionStorage.setItem(
+            'strophe-bosh-session',
+            JsonCodec().encode(
+                {'jid': this._conn.jid, 'rid': this.rid, 'sid': this.sid}));
       }
     } else {
       SessionStorage.removeItem('strophe-bosh-session');
@@ -372,7 +392,10 @@ class StropheBosh extends ServiceType {
    */
   void _hitError(int reqStatus) {
     this.errors++;
-    Strophe.warn("request errored, status: " + reqStatus.toString() + ", number of errors: " + this.errors.toString());
+    Strophe.warn("request errored, status: " +
+        reqStatus.toString() +
+        ", number of errors: " +
+        this.errors.toString());
     if (this.errors > 4) {
       this._conn.onDisconnectTimeout();
     }
@@ -419,7 +442,10 @@ class StropheBosh extends ServiceType {
   _onIdle() {
     var data = this._conn.data;
     // if no requests are in progress, poll
-    if (this._conn.authenticated && this._requests.length == 0 && data.length == 0 && !this._conn.disconnecting) {
+    if (this._conn.authenticated &&
+        this._requests.length == 0 &&
+        data.length == 0 &&
+        !this._conn.disconnecting) {
       Strophe.info("no requests during idle cycle, sending " + "blank request");
       data.add(null);
     }
@@ -433,14 +459,20 @@ class StropheBosh extends ServiceType {
       for (int i = 0; i < data.length; i++) {
         if (data[i] != null) {
           if (data[i] == "restart") {
-            body.attrs({'to': this._conn.domain, "xml:lang": "en", "xmpp:restart": "true", "xmlns:xmpp": Strophe.NS['BOSH']});
+            body.attrs({
+              'to': this._conn.domain,
+              "xml:lang": "en",
+              "xmpp:restart": "true",
+              "xmlns:xmpp": Strophe.NS['BOSH']
+            });
           } else {
             body.cnode(data[i]).up();
           }
         }
       }
       this._conn.data = [];
-      StropheRequest req = new StropheRequest(body.tree(), null, body.tree().getAttribute("rid"));
+      StropheRequest req = new StropheRequest(
+          body.tree(), null, body.tree().getAttribute("rid"));
       req.func = this._onRequestStateChange(this._conn.dataRecv, req);
       req.origFunc = req.func;
       this._requests.add(req);
@@ -450,7 +482,8 @@ class StropheBosh extends ServiceType {
     if (this._requests.length > 0) {
       var time_elapsed = this._requests[0].age();
       if (this._requests[0].dead != null) {
-        if (this._requests[0].timeDead() > (Strophe.SECONDARY_TIMEOUT * this.wait).floor()) {
+        if (this._requests[0].timeDead() >
+            (Strophe.SECONDARY_TIMEOUT * this.wait).floor()) {
           this._throttledRequestHandler();
         }
       }
@@ -481,7 +514,9 @@ class StropheBosh extends ServiceType {
       try {
         reqStatus = req.response.statusCode;
       } catch (e) {
-        Strophe.error("Caught an error while retrieving a request's status, " + "reqStatus: " + reqStatus.toString());
+        Strophe.error("Caught an error while retrieving a request's status, " +
+            "reqStatus: " +
+            reqStatus.toString());
       }
     }
     if (reqStatus == null) {
@@ -513,7 +548,9 @@ class StropheBosh extends ServiceType {
       req.abort = false;
       return;
     }
-    if (req.response != null && req.response.statusCode != 200 && req.response.statusCode != 304) {
+    if (req.response != null &&
+        req.response.statusCode != 200 &&
+        req.response.statusCode != 304) {
       // The request is not yet complete
       return;
     }
@@ -530,7 +567,8 @@ class StropheBosh extends ServiceType {
     if (valid_request || too_many_retries) {
       // remove from internal queue
       this._removeRequest(req);
-      Strophe.debug("request id " + req.id.toString() + " should now be removed");
+      Strophe.debug(
+          "request id " + req.id.toString() + " should now be removed");
     }
 
     if (reqStatus == 200) {
@@ -541,16 +579,32 @@ class StropheBosh extends ServiceType {
       // 1 is over Strophe.SECONDARY_TIMEOUT seconds old, we need to
       // restart the other - both will be in the first spot, as the
       // completed request has been removed from the queue already
-      if (reqIs1 || (reqIs0 && this._requests.length > 0 && this._requests[0].age() > (Strophe.SECONDARY_TIMEOUT * this.wait).floor())) {
+      if (reqIs1 ||
+          (reqIs0 &&
+              this._requests.length > 0 &&
+              this._requests[0].age() >
+                  (Strophe.SECONDARY_TIMEOUT * this.wait).floor())) {
         this._restartRequest(0);
       }
       this._conn.nextValidRid(int.parse(req.rid) + 1);
-      Strophe.debug("request id " + req.id.toString() + "." + req.sends.toString() + " got 200");
+      Strophe.debug("request id " +
+          req.id.toString() +
+          "." +
+          req.sends.toString() +
+          " got 200");
       func(req); // call handler
       this.errors = 0;
-    } else if (reqStatus == 0 || (reqStatus >= 400 && reqStatus < 600) || reqStatus >= 12000) {
+    } else if (reqStatus == 0 ||
+        (reqStatus >= 400 && reqStatus < 600) ||
+        reqStatus >= 12000) {
       // request failed
-      Strophe.error("request id " + req.id.toString() + "." + req.sends.toString() + " error " + reqStatus.toString() + " happened");
+      Strophe.error("request id " +
+          req.id.toString() +
+          "." +
+          req.sends.toString() +
+          " error " +
+          reqStatus.toString() +
+          " happened");
       this._hitError(reqStatus);
       this._callProtocolErrorHandlers(req);
       if (reqStatus >= 400 && reqStatus < 500) {
@@ -558,7 +612,13 @@ class StropheBosh extends ServiceType {
         this._conn.doDisconnect();
       }
     } else {
-      Strophe.error("request id " + req.id.toString() + "." + req.sends.toString() + " error " + reqStatus.toString() + " happened");
+      Strophe.error("request id " +
+          req.id.toString() +
+          "." +
+          req.sends.toString() +
+          " error " +
+          reqStatus.toString() +
+          " happened");
     }
 
     if (!valid_request && !too_many_retries) {
@@ -588,21 +648,31 @@ class StropheBosh extends ServiceType {
     }
 
     var time_elapsed = req.age();
-    var primaryTimeout = (time_elapsed is num && time_elapsed > (Strophe.TIMEOUT * this.wait).floor());
-    var secondaryTimeout = (req.dead != null && req.timeDead() > (Strophe.SECONDARY_TIMEOUT * this.wait).floor());
-    var requestCompletedWithServerError = (req.response != null && (reqStatus < 1 || reqStatus >= 500));
+    var primaryTimeout = (time_elapsed is num &&
+        time_elapsed > (Strophe.TIMEOUT * this.wait).floor());
+    var secondaryTimeout = (req.dead != null &&
+        req.timeDead() > (Strophe.SECONDARY_TIMEOUT * this.wait).floor());
+    var requestCompletedWithServerError =
+        (req.response != null && (reqStatus < 1 || reqStatus >= 500));
     if (primaryTimeout || secondaryTimeout || requestCompletedWithServerError) {
       if (secondaryTimeout) {
-        Strophe.error("Request " + this._requests[i].id.toString() + " timed out (secondary), restarting");
+        Strophe.error("Request " +
+            this._requests[i].id.toString() +
+            " timed out (secondary), restarting");
       }
       req.abort = true;
       req.xhr.close();
-      this._requests[i] = new StropheRequest(req.xmlData, req.origFunc, req.rid, req.sends);
+      this._requests[i] =
+          new StropheRequest(req.xmlData, req.origFunc, req.rid, req.sends);
       req = this._requests[i];
     }
 
     if (req.response == null) {
-      Strophe.debug("request id " + req.id.toString() + "." + req.sends.toString() + " posting");
+      Strophe.debug("request id " +
+          req.id.toString() +
+          "." +
+          req.sends.toString() +
+          " posting");
 
       // Fires the XHR request -- may be invoked immediately
       // or on a gradually expanding retry window for reconnects
@@ -612,7 +682,9 @@ class StropheBosh extends ServiceType {
       if (req.sends > 1) {
         // Using a cube of the retry number creates a nicely
         // expanding retry window
-        num backoff = min((Strophe.TIMEOUT * this.wait).floor(), pow(req.sends, 3)) * 1000;
+        num backoff =
+            min((Strophe.TIMEOUT * this.wait).floor(), pow(req.sends, 3)) *
+                1000;
         new Timer(new Duration(milliseconds: backoff), () {
           // XXX: setTimeout should be called only with function expressions (23974bc1)
           this._sendFunc(req);
@@ -646,7 +718,8 @@ class StropheBosh extends ServiceType {
     Map<String, dynamic> map;
     http.Request request;
     try {
-      contentType = this._conn.options['contentType'] ?? "text/xml; charset=utf-8";
+      contentType =
+          this._conn.options['contentType'] ?? "text/xml; charset=utf-8";
       request = new http.Request("POST", Uri.parse(this._conn.service));
       request.persistentConnection = this._conn.options['sync'] ? false : true;
       map = {"Content-Type": contentType};
@@ -656,7 +729,9 @@ class StropheBosh extends ServiceType {
     } catch (e2) {
       Strophe.error("XHR open failed: " + e2.toString());
       if (!this._conn.connected) {
-        this._conn.changeConnectStatus(Strophe.Status['CONNFAIL'], "bad-service");
+        this
+            ._conn
+            .changeConnectStatus(Strophe.Status['CONNFAIL'], "bad-service");
       }
       this._conn.disconnect();
       return;
@@ -748,7 +823,8 @@ class StropheBosh extends ServiceType {
     if (pres) {
       body.cnode(pres.tree());
     }
-    StropheRequest req = new StropheRequest(body.tree(), null, body.tree().getAttribute("rid"));
+    StropheRequest req =
+        new StropheRequest(body.tree(), null, body.tree().getAttribute("rid"));
     req.func = this._onRequestStateChange(this._conn.dataRecv, req);
     req.origFunc = req.func;
     this._requests.add(req);
@@ -796,9 +872,12 @@ class StropheBosh extends ServiceType {
    */
   _throttledRequestHandler() {
     if (this._requests == null) {
-      Strophe.debug("_throttledRequestHandler called with " + "undefined requests");
+      Strophe.debug(
+          "_throttledRequestHandler called with " + "undefined requests");
     } else {
-      Strophe.debug("_throttledRequestHandler called with " + this._requests.length.toString() + " requests");
+      Strophe.debug("_throttledRequestHandler called with " +
+          this._requests.length.toString() +
+          " requests");
     }
 
     if (this._requests == null || this._requests.length == 0) {
@@ -808,7 +887,10 @@ class StropheBosh extends ServiceType {
     if (this._requests.length > 0) {
       this._processRequest(0);
     }
-    if (this._requests.length > 1 && (int.parse(this._requests[0].rid) - int.parse(this._requests[1].rid)).abs() < this.window) {
+    if (this._requests.length > 1 &&
+        (int.parse(this._requests[0].rid) - int.parse(this._requests[1].rid))
+                .abs() <
+            this.window) {
       this._processRequest(1);
     }
   }
