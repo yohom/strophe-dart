@@ -756,21 +756,24 @@ class StropheBosh extends ServiceType {
       encoding: Encoding.getByName('utf-8'),
     )
         .then(
-      (value) {
-        print('The value: $value');
-      },
-    );
-    req.xhr.send(request).then(
-      (http.StreamedResponse response) async {
-        print('The raw response: $response');
-        print('The raw status code: ${response.statusCode}');
-        final respStr = await response.stream.bytesToString();
-        print(respStr);
-        req.response = await http.Response.fromStream(response);
+      (response) {
+        req.response = response;
+        connectCb(req.getResponse());
       },
     ).catchError((e) {
       print('The raw error: $e');
     });
+    // req.xhr.send(request).then(
+    //   (http.StreamedResponse response) async {
+    //     print('The raw response: $response');
+    //     print('The raw status code: ${response.statusCode}');
+    //     final respStr = await response.stream.bytesToString();
+    //     print(respStr);
+    //     req.response = await http.Response.fromStream(response);
+    //   },
+    // ).catchError((e) {
+    //   print('The raw error: $e');
+    // });
   }
 
   /** PrivateFunction: _removeRequest
