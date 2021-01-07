@@ -543,7 +543,7 @@ class StropheBosh extends ServiceType {
         "." +
         req.sends.toString() +
         " state changed to " +
-        (req.response != null ? req.response.statusCode : "0"));
+        (req.response != null ? req.response.statusCode.toString() : "0"));
     if (req.abort) {
       req.abort = false;
       return;
@@ -575,8 +575,8 @@ class StropheBosh extends ServiceType {
 
     if (reqStatus == 200) {
       // request succeeded
-      bool reqIs0 = (this._requests[0] == req);
-      bool reqIs1 = (this._requests[1] == req);
+      bool reqIs0 = (this._requests.length > 1 && this._requests[0] == req);
+      bool reqIs1 = (this._requests.length > 1 && this._requests[1] == req);
       // if request 1 finished, or request 0 finished and request
       // 1 is over Strophe.SECONDARY_TIMEOUT seconds old, we need to
       // restart the other - both will be in the first spot, as the
