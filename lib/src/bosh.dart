@@ -594,7 +594,7 @@ class StropheBosh extends ServiceType {
           "." +
           req.sends.toString() +
           " got 200");
-      func(req); // call handler
+      func(req, null, null); // call handler
       this.errors = 0;
     } else if (reqStatus == 0 ||
         (reqStatus >= 400 && reqStatus < 600) ||
