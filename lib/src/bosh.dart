@@ -717,16 +717,15 @@ class StropheBosh extends ServiceType {
 
   _sendFunc(StropheRequest req) {
     String contentType;
-    Map<String, String> map;
     http.Request request;
     try {
       contentType =
           this._conn.options['contentType'] ?? "text/xml; charset=utf-8";
       request = new http.Request("POST", Uri.parse(this._conn.service));
       request.persistentConnection = this._conn.options['sync'] ? false : true;
-      map = {"Content-Type": contentType};
+      request.headers['Content-Type'] = contentType;
       if (this._conn.options['withCredentials']) {
-        map['withCredentials'] = 'true';
+        request.headers['withCredentials'] = 'true';
       }
     } catch (e2) {
       Strophe.error("XHR open failed: " + e2.toString());
@@ -742,38 +741,22 @@ class StropheBosh extends ServiceType {
     if (this._conn.options['customHeaders'] != null) {
       var headers = this._conn.options['customHeaders'];
       for (var header in headers) {
-        map[header] = headers[header];
+        request.headers[header] = headers[header];
       }
     }
 
-    request.bodyFields = map;
-    // request.headers = map;
-    req.xhr
-        .post(
-      Uri.parse(this._conn.service),
-      headers: map,
-      body: req.data,
-      encoding: Encoding.getByName('utf-8'),
-    )
-        .then(
-      (response) {
-        req.response = response;
-        connectCb(req.getResponse());
+    request.body = req.data;
+    req.xhr.send(request).then(
+      (http.StreamedResponse response) async {
+        print('The raw response: $response');
+        print('The raw status code: ${response.statusCode}');
+        //final respStr = await response.stream.bytesToString();
+        //print(respStr);
+        req.response = await http.Response.fromStream(response);
       },
     ).catchError((e) {
       print('The raw error: $e');
     });
-    // req.xhr.send(request).then(
-    //   (http.StreamedResponse response) async {
-    //     print('The raw response: $response');
-    //     print('The raw status code: ${response.statusCode}');
-    //     final respStr = await response.stream.bytesToString();
-    //     print(respStr);
-    //     req.response = await http.Response.fromStream(response);
-    //   },
-    // ).catchError((e) {
-    //   print('The raw error: $e');
-    // });
   }
 
   /** PrivateFunction: _removeRequest
