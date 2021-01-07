@@ -75,7 +75,7 @@ class StropheBosh extends ServiceType {
     StanzaBuilder bodyWrap = Strophe.$build(
         'body', {'rid': this.rid++, 'xmlns': Strophe.NS['HTTPBIND']});
     if (this.sid != null) {
-      bodyWrap = bodyWrap.attrs({sid: this.sid});
+      bodyWrap = bodyWrap.attrs({'sid': this.sid});
     }
     if (this._conn.options['keepalive'] &&
         this._conn.sessionCachingSupported()) {
