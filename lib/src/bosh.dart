@@ -135,7 +135,7 @@ class StropheBosh extends ServiceType {
     }
     StropheRequest req =
         new StropheRequest(body.tree(), null, body.tree().getAttribute("rid"));
-    req.func = this._onRequestStateChange(this._conn.connectCb, req);
+    req.func = () => this._onRequestStateChange(this._conn.connectCb, req);
     req.origFunc = req.func;
 
     this._requests.add(req);
@@ -753,6 +753,7 @@ class StropheBosh extends ServiceType {
         //final respStr = await response.stream.bytesToString();
         //print(respStr);
         req.response = await http.Response.fromStream(response);
+        req.func();
       },
     ).catchError((e) {
       print('The raw error: $e');
