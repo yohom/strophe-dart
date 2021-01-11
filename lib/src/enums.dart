@@ -743,7 +743,7 @@ class StropheConnection {
       this._requests = [];
       this._uniqueId = 0;
     };
-    this._connectCb = (req, Function _callback, String raw) {
+    this._connectCb = (req, [Function _callback, String raw]) {
       this.connected = true;
 
       xml.XmlElement bodyWrap;

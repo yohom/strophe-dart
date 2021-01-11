@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+
 import 'package:http/http.dart' as http;
 import 'package:strophe/src/core.dart';
 import 'package:strophe/src/enums.dart';
@@ -473,7 +474,7 @@ class StropheBosh extends ServiceType {
       this._conn.data = [];
       StropheRequest req = new StropheRequest(
           body.tree(), null, body.tree().getAttribute("rid"));
-      req.func = this._onRequestStateChange(this._conn.dataRecv, req);
+      req.func = () => this._onRequestStateChange(this._conn.dataRecv, req);
       req.origFunc = req.func;
       this._requests.add(req);
       this._throttledRequestHandler();
@@ -594,7 +595,7 @@ class StropheBosh extends ServiceType {
           "." +
           req.sends.toString() +
           " got 200");
-      func(req, null, null); // call handler
+      func?.call(req); // call handler
       this.errors = 0;
     } else if (reqStatus == 0 ||
         (reqStatus >= 400 && reqStatus < 600) ||
@@ -750,10 +751,8 @@ class StropheBosh extends ServiceType {
       (http.StreamedResponse response) async {
         print('The raw response: $response');
         print('The raw status code: ${response.statusCode}');
-        //final respStr = await response.stream.bytesToString();
-        //print(respStr);
         req.response = await http.Response.fromStream(response);
-        req.func();
+        req.func?.call();
       },
     ).catchError((e) {
       print('The raw error: $e');
@@ -803,6 +802,7 @@ class StropheBosh extends ServiceType {
    *  Returns:
    *    The stanza that was passed.
    */
+  @override
   xml.XmlElement reqToData(dynamic req) {
     req = req as StropheRequest;
     return this._reqToData(req);

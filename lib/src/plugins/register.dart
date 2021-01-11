@@ -66,7 +66,7 @@ class RegisterPlugin extends PluginClass {
 
     // hooking strophe's _connect_cb
     Function connect_cb = conn.connectCb;
-    conn.connectCb = (req, Function _callback, String raw) {
+    conn.connectCb = (req, [Function _callback, String raw]) {
       if (!this._registering) {
         if (this.processed_features) {
           // exchange Input hooks to not print the stream:features twice
