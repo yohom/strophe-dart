@@ -217,8 +217,8 @@ class RegisterPlugin extends PluginClass {
 
     // send a get request for registration, to get all required data fields
     conn.addSysHandler(this._get_register_cb, null, "iq", null, null);
-    conn.sendIQ(Strophe.$iq({'type': "get"}).c(
-        "query", {'xmlns': Strophe.NS['REGISTER']}).tree());
+    conn.sendIQ(Strophe.$iq({'type': "get"})
+        .c("query", {'xmlns': Strophe.NS['REGISTER']}).tree());
 
     return true;
   }
@@ -281,8 +281,8 @@ class RegisterPlugin extends PluginClass {
     String name;
     List<String> fields;
     StropheConnection conn = this.connection;
-    StanzaBuilder query = Strophe
-        .$iq({'type': "set"}).c("query", {'xmlns': Strophe.NS['REGISTER']});
+    StanzaBuilder query = Strophe.$iq({'type': "set"})
+        .c("query", {'xmlns': Strophe.NS['REGISTER']});
     // set required fields
     fields = this.fields.keys.toList();
     for (int i = 0; i < fields.length; i++) {

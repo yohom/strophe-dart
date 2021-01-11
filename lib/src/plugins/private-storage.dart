@@ -30,7 +30,8 @@ class PrivateStorage extends PluginClass {
     String id = this.connection.getUniqueId('saveXML');
     ns = ns ?? 'namespace';
     tag = tag ?? 'tag';
-    StanzaBuilder iq = Strophe.$iq({'type': 'set', 'id': id}).c('query', {'xmlns': Strophe.NS['PRIVATE']}).c(tag, {'xmlns': ns});
+    StanzaBuilder iq = Strophe.$iq({'type': 'set', 'id': id})
+        .c('query', {'xmlns': Strophe.NS['PRIVATE']}).c(tag, {'xmlns': ns});
 
     xml.XmlNode d = this._transformData(data);
 
@@ -52,7 +53,8 @@ class PrivateStorage extends PluginClass {
     String id = this.connection.getUniqueId('loadXML');
     ns = ns ?? 'namespace';
     tag = tag ?? 'tag';
-    StanzaBuilder iq = Strophe.$iq({'type': 'get', 'id': id}).c('query', {'xmlns': Strophe.NS['PRIVATE']}).c(tag, {'xmlns': ns});
+    StanzaBuilder iq = Strophe.$iq({'type': 'get', 'id': id})
+        .c('query', {'xmlns': Strophe.NS['PRIVATE']}).c(tag, {'xmlns': ns});
 
     this.connection.sendIQ(iq.tree(), (xml.XmlElement iq) {
       xml.XmlNode data = iq;

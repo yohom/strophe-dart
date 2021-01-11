@@ -57,7 +57,11 @@ class StropheWebSocket extends ServiceType {
   ///    A Strophe.Builder with a <stream> element.
   ///
   StanzaBuilder _buildStream() {
-    return Strophe.$build("open", {"xmlns": Strophe.NS['FRAMING'], "to": this._conn.domain, "version": '1.0'});
+    return Strophe.$build("open", {
+      "xmlns": Strophe.NS['FRAMING'],
+      "to": this._conn.domain,
+      "version": '1.0'
+    });
   }
 
   /// PrivateFunction: _check_streamerror
@@ -149,9 +153,11 @@ class StropheWebSocket extends ServiceType {
     this._disconnect();
     if (this.socketListen == null || this.socket == null) {
       // Create the new WebSocket
-      WebSocket.connect(this._conn.service, protocols: ['xmpp']).then((WebSocket socket) {
+      WebSocket.connect(this._conn.service, protocols: ['xmpp'])
+          .then((WebSocket socket) {
         this.socket = socket;
-        this.socketListen = this.socket.listen(this._connectCbWrapper, onError: this._onError, onDone: this._onClose);
+        this.socketListen = this.socket.listen(this._connectCbWrapper,
+            onError: this._onError, onDone: this._onClose);
         this._onOpen();
       }).catchError((e) {
         this._conn.connexionError("impossible de joindre le serveur XMPP : $e");
@@ -222,7 +228,8 @@ class StropheWebSocket extends ServiceType {
       message = message.toString();
     }
     if (message == null || message.isEmpty) return;
-    if (message.trim().indexOf("<open ") == 0 || message.trim().indexOf("<?xml") == 0) {
+    if (message.trim().indexOf("<open ") == 0 ||
+        message.trim().indexOf("<?xml") == 0) {
       // Strip the XML Declaration, if there is one
       String data = message.replaceAll(new RegExp(r"^(<\?.*?\?>\s*)*"), "");
       if (data == '') return;
@@ -240,14 +247,17 @@ class StropheWebSocket extends ServiceType {
       // <close xmlns="urn:ietf:params:xml:ns:xmpp-framing />
       this._conn.rawInput(message);
       this._conn.xmlInput(xml.parse(message).rootElement);
-      String seeUri = xml.parse(message).rootElement.getAttribute("see-other-uri");
+      String seeUri =
+          xml.parse(message).rootElement.getAttribute("see-other-uri");
       if (seeUri != null && seeUri.isNotEmpty) {
-        this._conn.changeConnectStatus(Strophe.Status['REDIRECT'], "Received see-other-uri, resetting connection");
+        this._conn.changeConnectStatus(Strophe.Status['REDIRECT'],
+            "Received see-other-uri, resetting connection");
         this._conn.reset();
         this._conn.service = seeUri;
         this._connect();
       } else {
-        this._conn.changeConnectStatus(Strophe.Status['CONNFAIL'], "Received closing stream");
+        this._conn.changeConnectStatus(
+            Strophe.Status['CONNFAIL'], "Received closing stream");
         this._conn.doDisconnect();
       }
     } else {
@@ -271,7 +281,8 @@ class StropheWebSocket extends ServiceType {
         this._conn.send(pres.tree());
       }
 
-      StanzaBuilder close = Strophe.$build("close", {"xmlns": Strophe.NS['FRAMING']});
+      StanzaBuilder close =
+          Strophe.$build("close", {"xmlns": Strophe.NS['FRAMING']});
       this._conn.xmlOutput(close.tree());
       String closeString = Strophe.serialize(close.tree());
       this._conn.rawOutput(closeString);
@@ -346,7 +357,8 @@ class StropheWebSocket extends ServiceType {
       // dispatch a CONNFAIL status update to be consistent with the
       // behavior on other browsers.
       Strophe.error("Websocket closed unexcectedly");
-      this._conn.changeConnectStatus(Strophe.Status['CONNFAIL'], "The WebSocket connection could not be established or was disconnected.");
+      this._conn.changeConnectStatus(Strophe.Status['CONNFAIL'],
+          "The WebSocket connection could not be established or was disconnected.");
       this._conn.doDisconnect();
     } else {
       Strophe.info("Websocket closed");
@@ -378,7 +390,8 @@ class StropheWebSocket extends ServiceType {
   /// (Object) error - The websocket error.
   void _onError(Object error) {
     Strophe.error("Websocket error " + error.toString());
-    this._conn.changeConnectStatus(Strophe.Status['CONNFAIL'], "The WebSocket connection could not be established or was disconnected.");
+    this._conn.changeConnectStatus(Strophe.Status['CONNFAIL'],
+        "The WebSocket connection could not be established or was disconnected.");
     this._disconnect();
   }
 
@@ -463,7 +476,9 @@ class StropheWebSocket extends ServiceType {
 
     //handle unavailable presence stanza before disconnecting
     xml.XmlElement firstChild = elem.firstChild;
-    if (this._conn.disconnecting && firstChild.name.qualified == "presence" && firstChild.getAttribute("type") == "unavailable") {
+    if (this._conn.disconnecting &&
+        firstChild.name.qualified == "presence" &&
+        firstChild.getAttribute("type") == "unavailable") {
       this._conn.xmlInput(elem.root);
       this._conn.rawInput(Strophe.serialize(elem));
       // if we are already disconnecting we will ignore the unavailable stanza and
