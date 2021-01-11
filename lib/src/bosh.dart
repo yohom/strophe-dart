@@ -740,10 +740,10 @@ class StropheBosh extends ServiceType {
     }
     req.date = new DateTime.now().millisecondsSinceEpoch;
     if (this._conn.options['customHeaders'] != null) {
-      var headers = this._conn.options['customHeaders'];
-      for (var header in headers) {
-        request.headers[header] = headers[header];
-      }
+      Map<String, dynamic> headers = this._conn.options['customHeaders'];
+      headers.forEach((key, value) {
+        request.headers[key] = headers[key];
+      });
     }
 
     request.body = req.data;
