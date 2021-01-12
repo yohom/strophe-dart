@@ -826,7 +826,7 @@ class StropheConnection {
     };
   }
 
-  addConnectionPlugin(String name, PluginClass ptype) {
+  static addConnectionPlugin(String name, PluginClass ptype) {
     Strophe.addConnectionPlugin(name, ptype);
   }
 
