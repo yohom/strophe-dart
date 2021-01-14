@@ -1,9 +1,8 @@
 library strophe;
 
+export 'src/bosh.dart';
 export 'src/core.dart';
 export 'src/enums.dart';
-export 'src/websocket.dart';
-export 'src/bosh.dart';
 export 'src/plugins/administration.dart';
 export 'src/plugins/bookmark.dart';
 export 'src/plugins/caps.dart';
@@ -12,10 +11,12 @@ export 'src/plugins/disco.dart';
 export 'src/plugins/last-activity.dart';
 export 'src/plugins/muc.dart';
 export 'src/plugins/pep.dart';
+export 'src/plugins/ping.dart';
 export 'src/plugins/plugins.dart';
 export 'src/plugins/privacy.dart';
-export 'src/plugins/pubsub.dart';
 export 'src/plugins/private-storage.dart';
+export 'src/plugins/pubsub.dart';
 export 'src/plugins/register.dart';
 export 'src/plugins/roster.dart';
 export 'src/plugins/vcard-temp.dart';
+export 'src/websocket.dart';

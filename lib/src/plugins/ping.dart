@@ -30,7 +30,7 @@ class PingPlugin extends PluginClass {
 
   final List<int> _pingExecIntervals = [];
   int _pingTimestampsToKeep;
-  DateTime _lastServerCheck;
+  DateTime _lastServerCheck = DateTime.now();
   int _failedPings = 0;
   Timer _pingTimer;
 
@@ -82,7 +82,7 @@ class PingPlugin extends PluginClass {
   /// @param remoteJid remote JID to which ping requests will be sent to.
   void startInterval(String remoteJid) {
     _pingTimer = Timer.periodic(
-      Duration(seconds: pingInterval),
+      Duration(milliseconds: pingInterval),
       (Timer timer) {
         debugPrint('_____ Timer tick: ${timer.tick}');
 
@@ -90,8 +90,11 @@ class PingPlugin extends PluginClass {
         // time we checked (_lastServerCheck), let's skip the ping
 
         final now = DateTime.now();
+        // debugPrint('A: ${getTimeSinceLastServerResponse()}');
+        // debugPrint('B: ${now.difference(_lastServerCheck)}');
         if (getTimeSinceLastServerResponse() <
             now.difference(_lastServerCheck)) {
+          debugPrint('Skip the ping');
           // do this just to keep in sync the intervals so we can detect suspended device
           _addPingExecutionTimestamp();
           _lastServerCheck = now;
@@ -103,6 +106,7 @@ class PingPlugin extends PluginClass {
         ping(
           jid: remoteJid,
           onSuccess: (result) {
+            debugPrint('Ping onSuccess');
             // server response is measured on raw input and ping response time is measured after all the xmpp
             // processing is done in js, so there can be some misalignment when we do the check above.
             // That's why we store the last time we got the response
@@ -111,6 +115,7 @@ class PingPlugin extends PluginClass {
             _failedPings = 0;
           },
           onError: (error) {
+            debugPrint('Ping onError');
             _failedPings++;
             final errorMessage = 'Ping ${error != null ? 'error' : 'timeout'}';
 
@@ -126,7 +131,8 @@ class PingPlugin extends PluginClass {
         );
       },
     );
-    debugPrint('XMPP pings will be sent every ${this.pingInterval} ms');
+    debugPrint(
+        'XMPP pings will be sent every ${this.pingInterval} ms. JID: $remoteJid');
   }
 
   /// Stops current "ping"  interval task.
