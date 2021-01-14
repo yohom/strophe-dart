@@ -1438,8 +1438,8 @@ class StropheConnection {
   /// The id used to send the IQ.
   String sendIQ(
     xml.XmlNode el, [
-    Function onSuccess,
-    Function onError,
+    Function(XmlElement stanza) onSuccess,
+    Function(XmlElement stanza) onError,
     int timeout,
   ]) {
     StanzaTimedHandler timeoutHandler;

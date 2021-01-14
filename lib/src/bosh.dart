@@ -64,7 +64,7 @@ class StropheBosh extends ServiceType {
    *  This will enable stripping of the body tag in both
    *  <Strophe.Connection.xmlInput> and <Strophe.Connection.xmlOutput>.
    */
-  String strip = null;
+  String strip;
 
   /** PrivateFunction: _buildBody
    *  _Private_ helper function to generate the <body/> wrapper for BOSH.
@@ -375,10 +375,9 @@ class StropheBosh extends ServiceType {
    */
   _callProtocolErrorHandlers(StropheRequest req) {
     int reqStatus = this._getRequestStatus(req);
-    Function err_callback = this._conn.protocolErrorHandlers['HTTP'][reqStatus];
-    if (err_callback != null) {
-      err_callback.call(this, reqStatus);
-    }
+    Function errorCallback =
+        this._conn.protocolErrorHandlers['HTTP'][reqStatus];
+    errorCallback?.call(this, reqStatus);
   }
 
   /** PrivateFunction: _hitError
@@ -481,7 +480,7 @@ class StropheBosh extends ServiceType {
     }
 
     if (this._requests.length > 0) {
-      var time_elapsed = this._requests[0].age();
+      var timeElapsed = this._requests[0].age();
       if (this._requests[0].dead != null) {
         if (this._requests[0].timeDead() >
             (Strophe.SECONDARY_TIMEOUT * this.wait).floor()) {
@@ -489,7 +488,7 @@ class StropheBosh extends ServiceType {
         }
       }
 
-      if (time_elapsed > (Strophe.TIMEOUT * this.wait).floor()) {
+      if (timeElapsed > (Strophe.TIMEOUT * this.wait).floor()) {
         Strophe.warn("Request " +
             this._requests[0].id.toString() +
             " timed out, over " +
@@ -650,9 +649,9 @@ class StropheBosh extends ServiceType {
       return;
     }
 
-    var time_elapsed = req.age();
-    var primaryTimeout = (time_elapsed is num &&
-        time_elapsed > (Strophe.TIMEOUT * this.wait).floor());
+    var timeElapsed = req.age();
+    var primaryTimeout = (timeElapsed is num &&
+        timeElapsed > (Strophe.TIMEOUT * this.wait).floor());
     var secondaryTimeout = (req.dead != null &&
         req.timeDead() > (Strophe.SECONDARY_TIMEOUT * this.wait).floor());
     var requestCompletedWithServerError =
@@ -995,9 +994,9 @@ class StropheRequest {
    */
   xml.XmlElement getResponse() {
     String body = response.body;
-    xml.XmlElement node = null;
+    xml.XmlElement node;
     try {
-      node = xml.parse(body).rootElement;
+      node = xml.XmlDocument.parse(body).rootElement;
       Strophe.error("responseXML: " + Strophe.serialize(node));
       if (node == null) {
         throw {'message': 'Parsing produced null node'};

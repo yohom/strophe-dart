@@ -1,8 +1,8 @@
 import 'package:strophe/src/bosh.dart';
+import 'package:strophe/src/enums.dart';
 import 'package:strophe/src/plugins/plugins.dart';
 import 'package:strophe/src/websocket.dart';
 import 'package:xml/xml.dart' as xml;
-import 'package:strophe/src/enums.dart';
 
 class Strophe {
   static const String VERSION = '0.0.1';
@@ -325,7 +325,7 @@ class Strophe {
   static xml.XmlNode xmlHtmlNode(String html) {
     xml.XmlNode parsed;
     try {
-      parsed = xml.parse(html);
+      parsed = xml.XmlDocument.parse(html);
     } catch (e) {
       parsed = null;
     }

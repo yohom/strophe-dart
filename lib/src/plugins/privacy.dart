@@ -136,7 +136,7 @@ class PrivacyPlugin extends PluginClass {
         Strophe.$iq(
                 {'type': "set", 'id': this.connection.getUniqueId("privacy")})
             .c("query", {'xmlns': Strophe.NS['PRIVACY']}).c(
-                "list", {'name': name}).tree(), () {
+                "list", {'name': name}).tree(), (_) {
       this.lists.remove(name);
       if (successCallback != null)
         try {
@@ -184,7 +184,7 @@ class PrivacyPlugin extends PluginClass {
       }
       itemNode.up();
     }
-    this.connection.sendIQ(listIQ.tree(), () {
+    this.connection.sendIQ(listIQ.tree(), (_) {
       listModel._isPulled = true;
       if (successCallback != null)
         try {
@@ -262,7 +262,7 @@ class PrivacyPlugin extends PluginClass {
             {'type': "set", 'id': this.connection.getUniqueId("privacy")})
         .c("query", {'xmlns': Strophe.NS['PRIVACY']}).c("active");
     if (name != null && name.isNotEmpty) iq.attrs({'name': name});
-    this.connection.sendIQ(iq.tree(), () {
+    this.connection.sendIQ(iq.tree(), (_) {
       this._active = name;
       if (successCallback != null)
         try {
@@ -294,7 +294,7 @@ class PrivacyPlugin extends PluginClass {
             {'type': "set", 'id': this.connection.getUniqueId("privacy")})
         .c("query", {'xmlns': Strophe.NS['PRIVACY']}).c("default");
     if (name != null && name.isNotEmpty) iq.attrs({'name': name});
-    this.connection.sendIQ(iq.tree(), () {
+    this.connection.sendIQ(iq.tree(), (_) {
       this._default = name;
       if (successCallback != null)
         try {
