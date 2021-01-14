@@ -25,6 +25,7 @@ import 'package:strophe/src/plugins/roster.dart';
 import 'package:strophe/src/plugins/vcard-temp.dart';
 import 'package:strophe/src/sessionstorage.dart';
 import 'package:strophe/src/sha1.dart';
+import 'package:strophe/src/strophelastsuccess.dart';
 import 'package:strophe/src/utils.dart';
 import 'package:xml/xml.dart' as xml;
 import 'package:xml/xml.dart';
@@ -528,6 +529,7 @@ class StropheConnection {
    * @property {function} reject - The reject method of the deferred Promise.
    * @property {number} timeout - The ID of the timeout task that needs to be cleared, before sending the IQ.
    */
+
   /// Deferred IQs to be sent upon reconnect.
   /// @type {Array<DeferredSendIQ>}
   /// @private
@@ -654,6 +656,8 @@ class StropheConnection {
 
   RawInputCallback _rawOutputCallback = (String elem) => {};
 
+  LastSuccessTracker _lastSuccessTracker;
+
   // The service URL
   int get uniqueId {
     return this._uniqueId;
@@ -718,11 +722,26 @@ class StropheConnection {
     this._saslFailureHandler = null;
     this._saslChallengeHandler = null;
 
-    // Max retries before disconnecting
-    this.maxRetries = 5;
+    // The default maxRetries is 5, which is too long.
+    this.maxRetries = 3;
+
+    _lastSuccessTracker = LastSuccessTracker();
+    _lastSuccessTracker.startTracking(this);
+
+    this.addConnectionPlugin(
+      'ping',
+      PingPlugin(
+          getTimeSinceLastServerResponse:
+              _lastSuccessTracker.getTimeSinceLastSuccess,
+          onPingThresholdExceeded: () {
+            // ignore
+            // should kill webSocket connection
+          }),
+    );
+
     // Call onIdle callback every 1/10th of a second
     // XXX: setTimeout should be called only with function expressions (23974bc1)
-    this._idleTimeout = new Timer(new Duration(milliseconds: 100), () {
+    this._idleTimeout = Timer(const Duration(milliseconds: 100), () {
       this._onIdle();
     });
 
@@ -763,6 +782,7 @@ class StropheConnection {
       this._requests = [];
       this._uniqueId = 0;
     };
+
     this._connectCb = (req, [Function _callback, String raw]) {
       this.connected = true;
 
@@ -2290,6 +2310,10 @@ class StropheConnection {
       jidNode = bind[0].findAllElements("jid").toList();
       if (jidNode.length > 0) {
         this.jid = Strophe.getText(jidNode[0]);
+
+        // todo: make sure that this is fired in correct place and order...
+        // js: _stropheConnectionCb in XmppConnection.js, line 256+
+        ping.startInterval(jid);
 
         if (this.doSession) {
           this._addSysHandler(

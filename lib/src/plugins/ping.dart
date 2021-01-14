@@ -81,6 +81,7 @@ class PingPlugin extends PluginClass {
   /// must be called before starting a new one.
   /// @param remoteJid remote JID to which ping requests will be sent to.
   void startInterval(String remoteJid) {
+    stopInterval(); // make sure that we don't have more than 1 active pingTimer at a time
     _pingTimer = Timer.periodic(
       Duration(milliseconds: pingInterval),
       (Timer timer) {
@@ -106,7 +107,6 @@ class PingPlugin extends PluginClass {
         ping(
           jid: remoteJid,
           onSuccess: (result) {
-            debugPrint('Ping onSuccess');
             // server response is measured on raw input and ping response time is measured after all the xmpp
             // processing is done in js, so there can be some misalignment when we do the check above.
             // That's why we store the last time we got the response
@@ -115,7 +115,6 @@ class PingPlugin extends PluginClass {
             _failedPings = 0;
           },
           onError: (error) {
-            debugPrint('Ping onError');
             _failedPings++;
             final errorMessage = 'Ping ${error != null ? 'error' : 'timeout'}';
 
