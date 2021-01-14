@@ -846,8 +846,9 @@ class StropheConnection {
     };
   }
 
-  static addConnectionPlugin(String name, PluginClass ptype) {
+  addConnectionPlugin(String name, PluginClass ptype) {
     Strophe.addConnectionPlugin(name, ptype);
+    ptype.init(this);
   }
 
   ServiceType get proto {
