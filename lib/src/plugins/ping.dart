@@ -55,8 +55,8 @@ class PingPlugin extends PluginClass {
 
   void ping({
     @required String jid,
-    Function(XmlElement stanza) success,
-    Function(XmlElement stanza) error,
+    Function(XmlElement stanza) onSuccess,
+    Function(XmlElement stanza) onError,
     int timeout, // ms
   }) {
     final Map<String, String> attrs = {
@@ -68,8 +68,12 @@ class PingPlugin extends PluginClass {
       'to': jid,
       'type': 'get',
     }).c('ping', attrs);
-    // todo: sendIQ2
-    connection.sendIQ(stanza.tree(), success, error, timeout);
+    connection.sendIQ2(
+      stanza.tree(),
+      onSuccess: onSuccess,
+      onError: onError,
+      timeout: timeout,
+    );
   }
 
   /// Starts to send ping in given interval to specified remote JID.
@@ -98,7 +102,7 @@ class PingPlugin extends PluginClass {
 
         ping(
           jid: remoteJid,
-          success: (result) {
+          onSuccess: (result) {
             // server response is measured on raw input and ping response time is measured after all the xmpp
             // processing is done in js, so there can be some misalignment when we do the check above.
             // That's why we store the last time we got the response
@@ -106,7 +110,7 @@ class PingPlugin extends PluginClass {
                 DateTime.now().add(getTimeSinceLastServerResponse());
             _failedPings = 0;
           },
-          error: (error) {
+          onError: (error) {
             _failedPings++;
             final errorMessage = 'Ping ${error != null ? 'error' : 'timeout'}';
 

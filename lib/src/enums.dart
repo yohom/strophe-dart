@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:strophe/src/bosh.dart';
 import 'package:strophe/src/core.dart';
 import 'package:strophe/src/md5.dart';
@@ -26,6 +27,7 @@ import 'package:strophe/src/sessionstorage.dart';
 import 'package:strophe/src/sha1.dart';
 import 'package:strophe/src/utils.dart';
 import 'package:xml/xml.dart' as xml;
+import 'package:xml/xml.dart';
 
 const Map<String, int> ConnexionStatus = {
   'ERROR': 0,
@@ -518,6 +520,18 @@ class StropheConnection {
   Function _startConnection;
 
   Function _attachConnection;
+
+  /**
+   * @typedef DeferredSendIQ Object
+   * @property {Element} iq - The IQ to send.
+   * @property {function} resolve - The resolve method of the deferred Promise.
+   * @property {function} reject - The reject method of the deferred Promise.
+   * @property {number} timeout - The ID of the timeout task that needs to be cleared, before sending the IQ.
+   */
+  /// Deferred IQs to be sent upon reconnect.
+  /// @type {Array<DeferredSendIQ>}
+  /// @private
+  // todo: List<DeferredSendIQ> _deferredIQs = [];
 
   RegisterPlugin get register {
     return Strophe.connectionPlugins['register'];
@@ -1363,6 +1377,31 @@ class StropheConnection {
     return id;
   }
 
+  /// Sends an IQ immediately if connected or puts it on the send queue otherwise(in contrary to other send methods
+  /// which would fail immediately if disconnected).
+  /// @param {Element} iq - The IQ to send.
+  /// @param {number} timeout - How long to wait for the response. The time when the connection is reconnecting is
+  /// included, which means that the IQ may never be sent and still fail with a timeout.
+
+  String sendIQ2(
+    xml.XmlNode el, {
+    Function(XmlElement stanza) onSuccess,
+    Function(XmlElement stanza) onError,
+    int timeout,
+  }) {
+    if (connected) {
+      return sendIQ(
+        el,
+        onSuccess,
+        onError,
+        timeout,
+      );
+    } else {
+      debugPrint('sendIQ2; not connected');
+      return null; // todo: impl
+    }
+  }
+
   /// Function: sendIQ
   /// Helper function to send IQ stanzas.
   ///
@@ -1378,8 +1417,8 @@ class StropheConnection {
   /// The id used to send the IQ.
   String sendIQ(
     xml.XmlNode el, [
-    Function callback,
-    Function errback,
+    Function onSuccess,
+    Function onError,
     int timeout,
   ]) {
     StanzaTimedHandler timeoutHandler;
@@ -1395,7 +1434,7 @@ class StropheConnection {
           .add(new xml.XmlAttribute(new xml.XmlName.fromString('id'), id));
     }
 
-    if (callback != null || errback != null) {
+    if (onSuccess != null || onError != null) {
       StanzaHandler handler = this.addHandler((stanza) {
         // remove timeout handler if there is one
         if (timeoutHandler != null) {
@@ -1404,12 +1443,12 @@ class StropheConnection {
         if (stanza is xml.XmlDocument) stanza = stanza.rootElement;
         String iqtype = stanza.getAttribute("type");
         if (iqtype == 'result') {
-          if (callback != null) {
-            callback(stanza);
+          if (onSuccess != null) {
+            onSuccess(stanza);
           }
         } else if (iqtype == 'error') {
-          if (errback != null) {
-            errback(stanza);
+          if (onError != null) {
+            onError(stanza);
           }
         } else {
           throw {
@@ -1424,8 +1463,8 @@ class StropheConnection {
           // get rid of normal handler
           this.deleteHandler(handler);
           // call errback on timeout with null stanza
-          if (errback != null) {
-            errback(null);
+          if (onError != null) {
+            onError(null);
           }
           return false;
         });
