@@ -14,6 +14,7 @@ import 'package:strophe/src/plugins/disco.dart';
 import 'package:strophe/src/plugins/last-activity.dart';
 import 'package:strophe/src/plugins/muc.dart';
 import 'package:strophe/src/plugins/pep.dart';
+import 'package:strophe/src/plugins/ping.dart';
 import 'package:strophe/src/plugins/plugins.dart';
 import 'package:strophe/src/plugins/privacy.dart';
 import 'package:strophe/src/plugins/private-storage.dart';
@@ -57,7 +58,8 @@ const Map<String, String> NAMESPACE = {
   'VERSION': "jabber:iq:version",
   'STANZAS': "urn:ietf:params:xml:ns:xmpp-stanzas",
   'XHTML_IM': "http://jabber.org/protocol/xhtml-im",
-  'XHTML': "http://www.w3.org/1999/xhtml"
+  'XHTML': "http://www.w3.org/1999/xhtml",
+  'PING': "http://www.w3.org/1999/xhtml"
 };
 const Map<String, String> ERRORSCONDITIONS = const {
   'BAD_FORMAT': "bad-format",
@@ -519,6 +521,10 @@ class StropheConnection {
 
   RegisterPlugin get register {
     return Strophe.connectionPlugins['register'];
+  }
+
+  PingPlugin get ping {
+    return Strophe.connectionPlugins['ping'];
   }
 
   DiscoPlugin get disco {
@@ -1370,8 +1376,12 @@ class StropheConnection {
   ///
   /// Returns:
   /// The id used to send the IQ.
-  String sendIQ(xml.XmlNode el,
-      [Function callback, Function errback, int timeout]) {
+  String sendIQ(
+    xml.XmlNode el, [
+    Function callback,
+    Function errback,
+    int timeout,
+  ]) {
     StanzaTimedHandler timeoutHandler;
     xml.XmlElement elem = el;
     if (el is xml.XmlDocument)
