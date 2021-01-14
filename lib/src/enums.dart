@@ -61,7 +61,7 @@ const Map<String, String> NAMESPACE = {
   'STANZAS': "urn:ietf:params:xml:ns:xmpp-stanzas",
   'XHTML_IM': "http://jabber.org/protocol/xhtml-im",
   'XHTML': "http://www.w3.org/1999/xhtml",
-  'PING': "http://www.w3.org/1999/xhtml"
+  'PING': "urn:xmpp:ping"
 };
 const Map<String, String> ERRORSCONDITIONS = const {
   'BAD_FORMAT': "bad-format",
