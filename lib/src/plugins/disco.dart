@@ -21,6 +21,7 @@ class DiscoPlugin extends PluginClass {
     return _features;
   }
 
+  @override
   init(StropheConnection conn) {
     this.connection = conn;
     this._identities = [];

@@ -9,6 +9,7 @@ class CapsPlugin extends PluginClass {
   String _hash = 'sha-1';
   String _node = 'http://strophe.im/strophejs/';
 
+  @override
   init(StropheConnection c) {
     this.connection = c;
     Strophe.addNamespace('CAPS', "http://jabber.org/protocol/caps");

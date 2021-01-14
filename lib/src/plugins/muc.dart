@@ -26,6 +26,7 @@ class MucPlugin extends PluginClass {
     return _muc;
   }
 
+  @override
   init(StropheConnection conn) {
     this.connection = conn;
     this._mucHandler = null;
