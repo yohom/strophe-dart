@@ -5,69 +5,74 @@ import 'package:strophe/src/enums.dart';
 import 'package:strophe/src/plugins/plugins.dart';
 import 'package:strophe/src/sha1.dart';
 
+/// Implements xep-0115 ( http://xmpp.org/extensions/xep-0115.html )
 class CapsPlugin extends PluginClass {
   String _hash = 'sha-1';
-  String _node = 'http://strophe.im/strophejs/';
+  final String node;
+
+  CapsPlugin({this.node = 'http://strophe.im/strophejs/'});
 
   @override
   init(StropheConnection c) {
-    this.connection = c;
+    connection = c;
     Strophe.addNamespace('CAPS', "http://jabber.org/protocol/caps");
-    if (this.connection.disco == null) {
+    if (connection.disco == null) {
       throw {'error': "disco plugin required!"};
     }
     this.connection.disco.addFeature(Strophe.NS['CAPS']);
     this.connection.disco.addFeature(Strophe.NS['DISCO_INFO']);
-    if (this.connection.disco.identities.length == 0) {
-      return this.connection.disco.addIdentity("client", "pc", "strophejs", "");
+    if (connection.disco.identities.isEmpty) {
+      return connection.disco.addIdentity("client", "pc", "strophejs", "");
     }
+
+    // todo: final emuc = connection.emuc; + listeners
   }
 
-  addFeature(String feature) {
-    return this.connection.disco.addFeature(feature);
+  bool addFeature(String feature) {
+    return connection.disco.addFeature(feature);
   }
 
-  removeFeature(String feature) {
-    return this.connection.disco.removeFeature(feature);
+  bool removeFeature(String feature) {
+    return connection.disco.removeFeature(feature);
   }
 
-  sendPres() {
+  void sendPres() {
     createCapsNode().then((StanzaBuilder caps) {
-      return this.connection.send(Strophe.$pres().cnode(caps.tree()));
+      return connection.send(Strophe.$pres().cnode(caps.tree()));
     });
   }
 
   Future<StanzaBuilder> createCapsNode() async {
-    String node;
-    if (this.connection.disco.identities.length > 0) {
-      node = this.connection.disco.identities[0]['name'] ?? "";
+    String lNode;
+    if (connection.disco.identities.isNotEmpty) {
+      lNode = connection.disco.identities[0]['name'] ?? "";
     } else {
-      node = this._node;
+      lNode = lNode;
     }
     return Strophe.$build("c", {
       'xmlns': Strophe.NS['CAPS'],
       'hash': this._hash,
-      'node': node,
+      'node': lNode,
       'ver': await generateVerificationString()
     });
   }
 
-  propertySort(List<Map<String, String>> array, String property) {
+  void propertySort(List<Map<String, String>> array, String property) {
     return array.sort((a, b) {
       return a[property].compareTo(b[property]);
     });
   }
 
-  generateVerificationString() async {
+  Future<String> generateVerificationString() async {
     String ns;
     List<String> _ref1;
     List<Map<String, String>> ids = [];
-    List<Map<String, String>> _ref = this.connection.disco.identities;
+    List<Map<String, String>> _ref = connection.disco.identities;
     for (int _i = 0, _len = _ref.length; _i < _len; _i++) {
       ids.add(_ref[_i]);
     }
     List<String> features = [];
-    _ref1 = this.connection.disco.features;
+    _ref1 = connection.disco.features;
     for (int _j = 0, _len1 = _ref1.length; _j < _len1; _j++) {
       features.add(_ref1[_j]);
     }

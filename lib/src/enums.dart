@@ -1300,7 +1300,7 @@ class StropheConnection {
   /// (XMLElement |
   /// [XMLElement] |
   /// Strophe.Builder) elem - The stanza to send.
-  send(dynamic elem) {
+  void send(dynamic elem) {
     if (elem == null) {
       return;
     }
