@@ -85,8 +85,6 @@ class PingPlugin extends PluginClass {
     _pingTimer = Timer.periodic(
       Duration(milliseconds: pingInterval),
       (Timer timer) {
-        debugPrint('_____ Timer tick: ${timer.tick}');
-
         // when there were some server responses in the interval since the last
         // time we checked (_lastServerCheck), let's skip the ping
 
