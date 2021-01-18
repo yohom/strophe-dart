@@ -25,7 +25,6 @@ import 'package:strophe/src/plugins/roster.dart';
 import 'package:strophe/src/plugins/vcard-temp.dart';
 import 'package:strophe/src/sessionstorage.dart';
 import 'package:strophe/src/sha1.dart';
-import 'package:strophe/src/strophelastsuccess.dart';
 import 'package:strophe/src/utils.dart';
 import 'package:xml/xml.dart' as xml;
 import 'package:xml/xml.dart';
@@ -656,8 +655,6 @@ class StropheConnection {
 
   RawInputCallback _rawOutputCallback = (String elem) => {};
 
-  LastSuccessTracker _lastSuccessTracker;
-
   // The service URL
   int get uniqueId {
     return this._uniqueId;
@@ -725,14 +722,10 @@ class StropheConnection {
     // The default maxRetries is 5, which is too long.
     this.maxRetries = 3;
 
-    _lastSuccessTracker = LastSuccessTracker();
-    _lastSuccessTracker.startTracking(this);
-
     this.addConnectionPlugin(
       'ping',
       PingPlugin(
-          getTimeSinceLastServerResponse:
-              _lastSuccessTracker.getTimeSinceLastSuccess,
+          getTimeSinceLastServerResponse: null,
           onPingThresholdExceeded: () {
             // ignore
             // should kill webSocket connection
