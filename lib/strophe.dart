@@ -11,7 +11,6 @@ export 'src/plugins/disco.dart';
 export 'src/plugins/last-activity.dart';
 export 'src/plugins/muc.dart';
 export 'src/plugins/pep.dart';
-export 'src/plugins/ping.dart';
 export 'src/plugins/plugins.dart';
 export 'src/plugins/privacy.dart';
 export 'src/plugins/private-storage.dart';

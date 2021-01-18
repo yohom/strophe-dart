@@ -15,7 +15,6 @@ import 'package:strophe/src/plugins/disco.dart';
 import 'package:strophe/src/plugins/last-activity.dart';
 import 'package:strophe/src/plugins/muc.dart';
 import 'package:strophe/src/plugins/pep.dart';
-import 'package:strophe/src/plugins/ping.dart';
 import 'package:strophe/src/plugins/plugins.dart';
 import 'package:strophe/src/plugins/privacy.dart';
 import 'package:strophe/src/plugins/private-storage.dart';
@@ -538,10 +537,6 @@ class StropheConnection {
     return Strophe.connectionPlugins['register'];
   }
 
-  PingPlugin get ping {
-    return Strophe.connectionPlugins['ping'];
-  }
-
   DiscoPlugin get disco {
     return Strophe.connectionPlugins['disco'];
   }
@@ -719,18 +714,8 @@ class StropheConnection {
     this._saslFailureHandler = null;
     this._saslChallengeHandler = null;
 
-    // The default maxRetries is 5, which is too long.
-    this.maxRetries = 3;
-
-    this.addConnectionPlugin(
-      'ping',
-      PingPlugin(
-          getTimeSinceLastServerResponse: null,
-          onPingThresholdExceeded: () {
-            // ignore
-            // should kill webSocket connection
-          }),
-    );
+    // Max retries before disconnecting
+    this.maxRetries = 5;
 
     // Call onIdle callback every 1/10th of a second
     // XXX: setTimeout should be called only with function expressions (23974bc1)
@@ -2303,10 +2288,6 @@ class StropheConnection {
       jidNode = bind[0].findAllElements("jid").toList();
       if (jidNode.length > 0) {
         this.jid = Strophe.getText(jidNode[0]);
-
-        // todo: make sure that this is fired in correct place and order...
-        // js: _stropheConnectionCb in XmppConnection.js, line 256+
-        ping.startInterval(jid);
 
         if (this.doSession) {
           this._addSysHandler(
