@@ -28,59 +28,12 @@ import 'package:strophe/src/utils.dart';
 import 'package:xml/xml.dart' as xml;
 import 'package:xml/xml.dart';
 
-const Map<String, int> ConnexionStatus = {
-  'ERROR': 0,
-  'CONNECTING': 1,
-  'CONNFAIL': 2,
-  "AUTHENTICATING": 3,
-  "AUTHFAIL": 4,
-  "CONNECTED": 5,
-  "DISCONNECTED": 6,
-  "DISCONNECTING": 7,
-  "ATTACHED": 8,
-  "REDIRECT": 9,
-  "CONNTIMEOUT": 10
-};
-const Map<String, String> NAMESPACE = {
-  'HTTPBIND': "http://jabber.org/protocol/httpbind",
-  'BOSH': "urn:xmpp:xbosh",
-  'CLIENT': "jabber:client",
-  'AUTH': "jabber:iq:auth",
-  'ROSTER': "jabber:iq:roster",
-  'PROFILE': "jabber:iq:profile",
-  'DISCO_INFO': "http://jabber.org/protocol/disco#info",
-  'DISCO_ITEMS': "http://jabber.org/protocol/disco#items",
-  'MUC': "http://jabber.org/protocol/muc",
-  'SASL': "urn:ietf:params:xml:ns:xmpp-sasl",
-  'STREAM': "http://etherx.jabber.org/streams",
-  'FRAMING': "urn:ietf:params:xml:ns:xmpp-framing",
-  'BIND': "urn:ietf:params:xml:ns:xmpp-bind",
-  'SESSION': "urn:ietf:params:xml:ns:xmpp-session",
-  'VERSION': "jabber:iq:version",
-  'STANZAS': "urn:ietf:params:xml:ns:xmpp-stanzas",
-  'XHTML_IM': "http://jabber.org/protocol/xhtml-im",
-  'XHTML': "http://www.w3.org/1999/xhtml",
-  'PING': "urn:xmpp:ping"
-};
 const Map<String, String> ERRORSCONDITIONS = const {
   'BAD_FORMAT': "bad-format",
   'CONFLICT': "conflict",
   'MISSING_JID_NODE': "x-strophe-bad-non-anon-jid",
   'NO_AUTH_MECH': "no-auth-mech",
   'UNKNOWN_REASON': "unknown",
-};
-const Map<String, int> LOGLEVEL = const {
-  'DEBUG': 0,
-  'INFO': 1,
-  'WARN': 2,
-  'ERROR': 3,
-  'FATAL': 4
-};
-const Map<String, int> ELEMENTTYPE = const {
-  'NORMAL': 1,
-  'TEXT': 3,
-  'CDATA': 4,
-  'FRAGMENT': 11
 };
 
 class StanzaBuilder {
