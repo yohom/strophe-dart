@@ -2,6 +2,7 @@ import 'package:strophe/src/Strophe.Builder.dart';
 import 'package:strophe/src/bosh.dart';
 import 'package:strophe/src/enums.dart';
 import 'package:strophe/src/plugins/plugins.dart';
+import 'package:strophe/src/stanza_handler.dart';
 import 'package:strophe/src/websocket.dart';
 import 'package:xml/xml.dart' as xml;
 
@@ -817,19 +818,19 @@ class Strophe {
     Strophe._connectionPlugins[name] = ptype;
   }
 
-  /** PrivateClass: Strophe.Handler
-   *  _Private_ helper class for managing stanza handlers.
-   *
-   *  A Strophe.Handler encapsulates a user provided callback function to be
-   *  executed when matching stanzas are received by the connection.
-   *  Handlers can be either one-off or persistant depending on their
-   *  return value. Returning true will cause a Handler to remain active, and
-   *  returning false will remove the Handler.
-   *
-   *  Users will not use Strophe.Handler objects directly, but instead they
-   *  will use Strophe.Connection.addHandler() and
-   *  Strophe.Connection.deleteHandler().
-   */
+  ///  PrivateClass: Strophe.Handler
+  ///  _Private_ helper class for managing stanza handlers.
+  ///
+  ///  A Strophe.Handler encapsulates a user provided callback function to be
+  ///  executed when matching stanzas are received by the connection.
+  ///  Handlers can be either one-off or persistant depending on their
+  ///  return value. Returning true will cause a Handler to remain active, and
+  ///  returning false will remove the Handler.
+  ///
+  ///  Users will not use Strophe.Handler objects directly, but instead they
+  ///  will use Strophe.Connection.addHandler() and
+  ///  Strophe.Connection.deleteHandler().
+  ///
 
   /// PrivateConstructor: Strophe.Handler
   ///  Create and initialize a new Strophe.Handler.
@@ -845,10 +846,12 @@ class Strophe {
   ///
   ///  Returns:
   ///    A new Strophe.Handler object.
+  ///
   static StanzaHandler Handler(Function handler, String ns, String name,
       [type, String id, String from, Map options]) {
     if (options != null) {
-      options.putIfAbsent('matchBareFromJid', () => false);
+      options.putIfAbsent('matchBareFromJid',
+          () => false); // TODO: is this correct? JS lien 1248
       options.putIfAbsent('ignoreNamespaceFragment', () => false);
     } else
       options = {'matchBareFromJid': false, 'ignoreNamespaceFragment': false};
