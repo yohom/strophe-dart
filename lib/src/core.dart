@@ -1,3 +1,4 @@
+import 'package:strophe/src/Strophe.Builder.dart';
 import 'package:strophe/src/bosh.dart';
 import 'package:strophe/src/enums.dart';
 import 'package:strophe/src/plugins/plugins.dart';
@@ -25,8 +26,8 @@ class Strophe {
   /// Returns:
   ///   A new Strophe.Builder object.
   ///
-  static StanzaBuilder $build(String name, Map<String, dynamic> attrs) {
-    return Strophe.Builder(name, attrs: attrs);
+  static StropheBuilder $build(String name, Map<String, dynamic> attrs) {
+    return StropheBuilder(name, attrs);
   }
 
   /// Function: $msg
@@ -38,8 +39,8 @@ class Strophe {
   /// Returns:
   ///   A new Strophe.Builder object.
   ///
-  static StanzaBuilder $msg([Map<String, dynamic> attrs]) {
-    return Strophe.Builder("message", attrs: attrs);
+  static StropheBuilder $msg([Map<String, dynamic> attrs]) {
+    return StropheBuilder("message", attrs);
   }
 
   /// Function: $iq
@@ -51,8 +52,8 @@ class Strophe {
   /// Returns:
   ///   A new Strophe.Builder object.
   ///
-  static StanzaBuilder $iq([Map<String, dynamic> attrs]) {
-    return Strophe.Builder("iq", attrs: attrs);
+  static StropheBuilder $iq([Map<String, dynamic> attrs]) {
+    return StropheBuilder("iq", attrs);
   }
 
   /// Function: $pres
@@ -64,8 +65,8 @@ class Strophe {
   /// Returns:
   ///   A new Strophe.Builder object.
   ///
-  static StanzaBuilder $pres([Map<String, dynamic> attrs]) {
-    return Strophe.Builder("presence", attrs: attrs);
+  static StropheBuilder $pres([Map<String, dynamic> attrs]) {
+    return StropheBuilder("presence", attrs);
   }
 
   /// Constants: XMPP Namespace Constants
@@ -254,6 +255,7 @@ class Strophe {
   /// ElementType.TEXT - Text data element.
   /// ElementType.FRAGMENT - XHTML fragment element.
   ///
+  // probably replaced by xml.XmlNodeType
   static const Map<String, int> ElementType = const {
     'NORMAL': 1,
     'TEXT': 3,
@@ -276,39 +278,36 @@ class Strophe {
   /// This defaults to 0.1, and with default wait, 6 seconds.
   static const num TIMEOUT = 1.1;
   static const num SECONDARY_TIMEOUT = 0.1;
-  static const Map<String, String> ErrorCondition = ERRORSCONDITIONS;
 
-  /** Function: addNamespace
-   *  This function is used to extend the current namespaces in
-   *  Strophe.NS.  It takes a key and a value with the key being the
-   *  name of the new namespace, with its actual value.
-   *  For example:
-   *  Strophe.addNamespace('PUBSUB', "http://jabber.org/protocol/pubsub");
-   *
-   *  Parameters:
-   *    (String) name - The name under which the namespace will be
-   *      referenced under Strophe.NS
-   *    (String) value - The actual namespace.
-   */
+  /// Function: addNamespace
+  ///  This function is used to extend the current namespaces in
+  ///  Strophe.NS.  It takes a key and a value with the key being the
+  ///  name of the new namespace, with its actual value.
+  ///  For example:
+  ///  Strophe.addNamespace('PUBSUB', "http://jabber.org/protocol/pubsub");
+  ///
+  ///  Parameters:
+  ///    (String) name - The name under which the namespace will be
+  ///      referenced under Strophe.NS
+  ///    (String) value - The actual namespace.
   static void addNamespace(String name, String value) {
     Strophe.NS[name] = value;
   }
 
-  /** Function: forEachChild
-   *  Map a function over some or all child elements of a given element.
-   *
-   *  This is a small convenience function for mapping a function over
-   *  some or all of the children of an element.  If elemName is null, all
-   *  children will be passed to the function, otherwise only children
-   *  whose tag names match elemName will be passed.
-   *
-   *  Parameters:
-   *    (XMLElement) elem - The element to operate on.
-   *    (String) elemName - The child element tag name filter.
-   *    (Function) func - The function to apply to each child.  This
-   *      function should take a single argument, a DOM element.
-   */
-  static void forEachChild(elem, String elemName, Function func) {
+  /// Function: forEachChild
+  ///  Map a function over some or all child elements of a given element.
+  ///
+  ///  This is a small convenience function for mapping a function over
+  ///  some or all of the children of an element.  If elemName is null, all
+  ///  children will be passed to the function, otherwise only children
+  ///  whose tag names match elemName will be passed.
+  ///
+  ///  Parameters:
+  ///    (XMLElement) elem - The element to operate on.
+  ///    (String) elemName - The child element tag name filter.
+  ///    (Function) func - The function to apply to each child.  This
+  ///      function should take a single argument, a DOM element.
+  static void forEachChild(xml.XmlNode elem, String elemName, Function func) {
     if (elem == null) return;
     var childNode;
     for (int i = 0; i < elem.children.length; i++) {
@@ -316,7 +315,8 @@ class Strophe {
         if (elem.children.elementAt(i) is xml.XmlElement)
           childNode = elem.children.elementAt(i);
         else if (elem.children.elementAt(i) is xml.XmlDocument)
-          childNode = elem.rootElement.children.elementAt(i);
+          childNode =
+              (elem as xml.XmlDocument).rootElement.children.elementAt(i);
       } catch (e) {
         childNode = null;
       }
@@ -328,45 +328,41 @@ class Strophe {
     }
   }
 
-  /** Function: isTagEqual
-   *  Compare an element's tag name with a string.
-   *
-   *  This function is case sensitive.
-   *
-   *  Parameters:
-   *    (XMLElement) el - A DOM element.
-   *    (String) name - The element name.
-   *
-   *  Returns:
-   *    true if the element's tag name matches _el_, and false
-   *    otherwise.
-   */
+  /// Function: isTagEqual
+  ///  Compare an element's tag name with a string.
+  ///
+  ///  This function is case sensitive.
+  ///
+  ///  Parameters:
+  ///    (XMLElement) el - A DOM element.
+  ///    (String) name - The element name.
+  ///
+  ///  Returns:
+  ///    true if the element's tag name matches _el_, and false
+  ///    otherwise.
   static bool isTagEqual(xml.XmlElement el, String name) {
     return el.name.qualified == name;
   }
 
-  /** PrivateVariable: _xmlGenerator
-   *  _Private_ variable that caches a DOM document to
-   *  generate elements.
-   */
+  /// PrivateVariable: _xmlGenerator
+  ///  _Private_ variable that caches a DOM document to
+  ///  generate elements.
   static xml.XmlBuilder _xmlGenerator;
 
-  /** PrivateFunction: _makeGenerator
-   *  _Private_ function that creates a dummy XML DOM document to serve as
-   *  an element and text node generator.
-   */
+  /// PrivateFunction: _makeGenerator
+  ///  _Private_ function that creates a dummy XML DOM document to serve as
+  ///  an element and text node generator.
   static xml.XmlBuilder _makeGenerator() {
     xml.XmlBuilder builder = xml.XmlBuilder();
     //builder.element('strophe', namespace: 'jabber:client');
     return builder;
   }
 
-  /** Function: xmlGenerator
-   *  Get the DOM document to generate elements.
-   *
-   *  Returns:
-   *    The currently used DOM document.
-   */
+  /// Function: xmlGenerator
+  ///  Get the DOM document to generate elements.
+  ///
+  ///  Returns:
+  ///    The currently used DOM document.
   static xml.XmlBuilder xmlGenerator() {
     //if (Strophe._xmlGenerator == null) {
     Strophe._xmlGenerator = Strophe._makeGenerator();
@@ -374,24 +370,32 @@ class Strophe {
     return Strophe._xmlGenerator;
   }
 
-  /** Function: xmlElement
-   *  Create an XML DOM element.
-   *
-   *  This function creates an XML DOM element correctly across all
-   *  implementations. Note that these are not HTML DOM elements, which
-   *  aren't appropriate for XMPP stanzas.
-   *
-   *  Parameters:
-   *    (String) name - The name for the element.
-   *    (Array|Object) attrs - An optional array or object containing
-   *      key/value pairs to use as element attributes. The object should
-   *      be in the format {'key': 'value'} or {key: 'value'}. The array
-   *      should have the format [['key1', 'value1'], ['key2', 'value2']].
-   *    (String) text - The text child data for the element.
-   *
-   *  Returns:
-   *    A new XML DOM element.
-   */
+  /// PrivateFunction: _getIEXmlDom
+  ///  Gets IE xml doc object
+  ///
+  ///  Returns:
+  ///    A Microsoft XML DOM Object
+  ///  See Also:
+  ///    http://msdn.microsoft.com/en-us/library/ms757837%28VS.85%29.aspx
+  // todo: _getIEXmlDom
+
+  /// Function: xmlElement
+  ///  Create an XML DOM element.
+  ///
+  ///  This function creates an XML DOM element correctly across all
+  ///  implementations. Note that these are not HTML DOM elements, which
+  ///  aren't appropriate for XMPP stanzas.
+  ///
+  ///  Parameters:
+  ///    (String) name - The name for the element.
+  ///    (Array|Object) attrs - An optional array or object containing
+  ///      key/value pairs to use as element attributes. The object should
+  ///      be in the format {'key': 'value'} or {key: 'value'}. The array
+  ///      should have the format [['key1', 'value1'], ['key2', 'value2']].
+  ///    (String) text - The text child data for the element.
+  ///
+  ///  Returns:
+  ///    A new XML DOM element.
   static xml.XmlNode xmlElement(String name, {dynamic attrs, String text}) {
     if (name == null || name.isEmpty || name.trim().length == 0) {
       return null;
@@ -422,19 +426,17 @@ class Strophe {
     }
     xml.XmlBuilder builder = Strophe.xmlGenerator();
     builder.element(name, attributes: attributes, nest: text);
-    return builder.build();
+    return builder.buildDocument();
   }
 
-/*  Function: xmlescape
-     *  Excapes invalid xml characters.
-     *
-     *  Parameters:
-     *     (String) text - text to escape.
-     *
-     *  Returns:
-     *      Escaped text.
-     */
-
+  /// Function: xmlescape
+  ///  Excapes invalid xml characters.
+  ///
+  ///  Parameters:
+  ///     (String) text - text to escape.
+  ///
+  ///  Returns:
+  ///      Escaped text.
   static String xmlescape(String text) {
     text = text.replaceAll(RegExp(r'&'), "&amp;");
     text = text.replaceAll(RegExp(r'<'), "&lt;");
@@ -444,15 +446,14 @@ class Strophe {
     return text;
   }
 
-  /*  Function: xmlunescape
-    *  Unexcapes invalid xml characters.
-    *
-    *  Parameters:
-    *     (String) text - text to unescape.
-    *
-    *  Returns:
-    *      Unescaped text.
-    */
+  /// Function: xmlunescape
+  ///  Unexcapes invalid xml characters.
+  ///
+  ///  Parameters:
+  ///     (String) text - text to unescape.
+  ///
+  ///  Returns:
+  ///      Unescaped text.
   static String xmlunescape(String text) {
     text = text.replaceAll(RegExp(r'&amp;'), "&");
     text = text.replaceAll(RegExp(r'&lt;'), "<");
@@ -462,31 +463,28 @@ class Strophe {
     return text;
   }
 
-  /** Function: xmlTextNode
-   *  Creates an XML DOM text node.
-   *
-   *
-   *  Parameters:
-   *    (String) text - The content of the text node.
-   *
-   *  Returns:
-   *    A new XML DOM text node.
-   */
+  /// Function: xmlTextNode
+  ///  Creates an XML DOM text node.
+  ///
+  ///  Parameters:
+  ///    (String) text - The content of the text node.
+  ///
+  ///  Returns:
+  ///    A new XML DOM text node.
   static xml.XmlNode xmlTextNode(String text) {
     xml.XmlBuilder builder = Strophe.xmlGenerator();
     builder.element('strophe', nest: text);
-    return builder.build();
+    return builder.buildDocument();
   }
 
-  /** Function: xmlHtmlNode
-   *  Creates an XML DOM html node.
-   *
-   *  Parameters:
-   *    (String) html - The content of the html node.
-   *
-   *  Returns:
-   *    A new XML DOM text node.
-   */
+  /// Function: xmlHtmlNode
+  ///  Creates an XML DOM html node.
+  ///
+  ///  Parameters:
+  ///    (String) html - The content of the html node.
+  ///
+  ///  Returns:
+  ///    A new XML DOM text node.
   static xml.XmlNode xmlHtmlNode(String html) {
     xml.XmlNode parsed;
     try {
@@ -497,20 +495,19 @@ class Strophe {
     return parsed;
   }
 
-  /** Function: getText
-   *  Get the concatenation of all text children of an element.
-   *
-   *  Parameters:
-   *    (XMLElement) elem - A DOM element.
-   *
-   *  Returns:
-   *    A String with the concatenated text of all text element children.
-   */
+  /// Function: getText
+  ///  Get the concatenation of all text children of an element.
+  ///
+  ///  Parameters:
+  ///    (XMLElement) elem - A DOM element.
+  ///
+  ///  Returns:
+  ///    A String with the concatenated text of all text element children.
   static String getText(xml.XmlNode elem) {
     if (elem == null) {
       return null;
     }
-    String str = "";
+    String str = '';
     if (elem.children.length == 0 && elem.nodeType == xml.XmlNodeType.TEXT) {
       str += elem.toString();
     }
@@ -523,18 +520,17 @@ class Strophe {
     return Strophe.xmlescape(str);
   }
 
-  /** Function: copyElement
-   *  Copy an XML DOM element.
-   *
-   *  This function copies a DOM element and all its descendants and returns
-   *  the new copy.
-   *
-   *  Parameters:
-   *    (XMLElement) elem - A DOM element.
-   *
-   *  Returns:
-   *    A new, copied DOM element tree.
-   */
+  /// Function: copyElement
+  ///  Copy an XML DOM element.
+  ///
+  ///  This function copies a DOM element and all its descendants and returns
+  ///  the new copy.
+  ///
+  ///  Parameters:
+  ///    (XMLElement) elem - A DOM element.
+  ///
+  ///  Returns:
+  ///    A new, copied DOM element tree.
   static xml.XmlNode copyElement(xml.XmlNode elem) {
     var el = elem;
     if (elem.nodeType == xml.XmlNodeType.ELEMENT) {
@@ -547,18 +543,17 @@ class Strophe {
     return el;
   }
 
-  /** Function: createHtml
-   *  Copy an HTML DOM element into an XML DOM.
-   *
-   *  This function copies a DOM element and all its descendants and returns
-   *  the new copy.
-   *
-   *  Parameters:
-   *    (HTMLElement) elem - A DOM element.
-   *
-   *  Returns:
-   *    A new, copied DOM element tree.
-   */
+  /// Function: createHtml
+  ///  Copy an HTML DOM element into an XML DOM.
+  ///
+  ///  This function copies a DOM element and all its descendants and returns
+  ///  the new copy.
+  ///
+  ///  Parameters:
+  ///    (HTMLElement) elem - A DOM element.
+  ///
+  ///  Returns:
+  ///    A new, copied DOM element tree.
   static xml.XmlNode createHtml(xml.XmlNode elem) {
     xml.XmlNode el;
     String tag;
@@ -583,15 +578,14 @@ class Strophe {
     return el;
   }
 
-  /** Function: escapeNode
-   *  Escape the node part (also called local part) of a JID.
-   *
-   *  Parameters:
-   *    (String) node - A node (or local part).
-   *
-   *  Returns:
-   *    An escaped node (or local part).
-   */
+  /// Function: escapeNode
+  ///  Escape the node part (also called local part) of a JID.
+  ///
+  ///  Parameters:
+  ///    (String) node - A node (or local part).
+  ///
+  ///  Returns:
+  ///    An escaped node (or local part).
   static String escapeNode(String node) {
     return node
         .replaceAll(RegExp(r"^\s+|\s+$"), '')
@@ -607,15 +601,14 @@ class Strophe {
         .replaceAll(RegExp(r'@'), "\\40");
   }
 
-  /** Function: unescapeNode
-   *  Unescape a node part (also called local part) of a JID.
-   *
-   *  Parameters:
-   *    (String) node - A node (or local part).
-   *
-   *  Returns:
-   *    An unescaped node (or local part).
-   */
+  /// Function: unescapeNode
+  ///  Unescape a node part (also called local part) of a JID.
+  ///
+  ///  Parameters:
+  ///    (String) node - A node (or local part).
+  ///
+  ///  Returns:
+  ///    An unescaped node (or local part).
   static String unescapeNode(String node) {
     return node
         .replaceAll(RegExp(r"\\5c"), "\\")
@@ -630,15 +623,14 @@ class Strophe {
         .replaceAll(RegExp(r'\\40'), "@");
   }
 
-  /** Function: getNodeFromJid
-   *  Get the node portion of a JID String.
-   *
-   *  Parameters:
-   *    (String) jid - A JID.
-   *
-   *  Returns:
-   *    A String containing the node.
-   */
+  /// Function: getNodeFromJid
+  ///  Get the node portion of a JID String.
+  ///
+  ///  Parameters:
+  ///    (String) jid - A JID.
+  ///
+  ///  Returns:
+  ///    A String containing the node.
   static String getNodeFromJid(String jid) {
     if (jid.indexOf("@") < 0) {
       return null;
@@ -646,15 +638,14 @@ class Strophe {
     return jid.split("@")[0];
   }
 
-  /** Function: getDomainFromJid
-   *  Get the domain portion of a JID String.
-   *
-   *  Parameters:
-   *    (String) jid - A JID.
-   *
-   *  Returns:
-   *    A String containing the domain.
-   */
+  /// Function: getDomainFromJid
+  ///  Get the domain portion of a JID String.
+  ///
+  ///  Parameters:
+  ///    (String) jid - A JID.
+  ///
+  ///  Returns:
+  ///    A String containing the domain.
   static String getDomainFromJid(String jid) {
     String bare = Strophe.getBareJidFromJid(jid);
     if (bare.indexOf("@") < 0) {
@@ -666,17 +657,16 @@ class Strophe {
     }
   }
 
-  /** Function: getResourceFromJid
-   *  Get the resource portion of a JID String.
-   *
-   *  Parameters:
-   *    (String) jid - A JID.
-   *
-   *  Returns:
-   *    A String containing the resource.
-   */
+  /// Function: getResourceFromJid
+  ///  Get the resource portion of a JID String.
+  ///
+  ///  Parameters:
+  ///    (String) jid - A JID.
+  ///
+  ///  Returns:
+  ///    A String containing the resource.
   static String getResourceFromJid(String jid) {
-    List<String> s = jid.split("/");
+    List<String> s = jid.split('/');
     if (s.length < 2) {
       return null;
     }
@@ -684,22 +674,20 @@ class Strophe {
     return s.join('/');
   }
 
-  /** Function: getBareJidFromJid
-   *  Get the bare JID from a JID String.
-   *
-   *  Parameters:
-   *    (String) jid - A JID.
-   *
-   *  Returns:
-   *    A String containing the bare JID.
-   */
+  /// Function: getBareJidFromJid
+  ///  Get the bare JID from a JID String.
+  ///
+  ///  Parameters:
+  ///    (String) jid - A JID.
+  ///
+  ///  Returns:
+  ///    A String containing the bare JID.
   static String getBareJidFromJid(String jid) {
-    return jid != null && jid.isNotEmpty ? jid.split("/")[0] : null;
+    return jid?.isNotEmpty == true ? jid.split("/")[0] : null;
   }
 
-  /** PrivateFunction: _handleError
-   *  _Private_ function that properly logs an error to the console
-   */
+  /// PrivateFunction: _handleError
+  ///  _Private_ function that properly logs an error to the console
   static handleError(Error e) {
     if (e.stackTrace != null) {
       Strophe.fatal(e.stackTrace.toString());
@@ -714,100 +702,93 @@ class Strophe {
     }
   }
 
-  /** Function: log
-   *  User overrideable logging function.
-   *
-   *  This function is called whenever the Strophe library calls any
-   *  of the logging functions.  The default implementation of this
-   *  function logs only fatal errors.  If client code wishes to handle the logging
-   *  messages, it should override this with
-   *  > Strophe.log = function (level, msg) {
-   *  >   (user code here)
-   *  > };
-   *
-   *  Please note that data sent and received over the wire is logged
-   *  via Strophe.Connection.rawInput() and Strophe.Connection.rawOutput().
-   *
-   *  The different levels and their meanings are
-   *
-   *    DEBUG - Messages useful for debugging purposes.
-   *    INFO - Informational messages.  This is mostly information like
-   *      'disconnect was called' or 'SASL auth succeeded'.
-   *    WARN - Warnings about potential problems.  This is mostly used
-   *      to report transient connection errors like request timeouts.
-   *    ERROR - Some error occurred.
-   *    FATAL - A non-recoverable fatal error occurred.
-   *
-   *  Parameters:
-   *    (Integer) level - The log level of the log message.  This will
-   *      be one of the values in Strophe.LogLevel.
-   *    (String) msg - The log message.
-   */
-  static log(int level, String msg) {
-    if (level != Strophe.LogLevel['FATAL']) {
-      print(msg);
-    }
+  /// Function: log
+  ///  User overrideable logging function.
+  ///
+  ///  This function is called whenever the Strophe library calls any
+  ///  of the logging functions.  The default implementation of this
+  ///  function logs only fatal errors.  If client code wishes to handle the logging
+  ///  messages, it should override this with
+  ///  > Strophe.log = function (level, msg) {
+  ///  >   (user code here)
+  ///  > };
+  ///
+  ///  Please note that data sent and received over the wire is logged
+  ///  via Strophe.Connection.rawInput() and Strophe.Connection.rawOutput().
+  ///
+  ///  The different levels and their meanings are
+  ///
+  ///    DEBUG - Messages useful for debugging purposes.
+  ///    INFO - Informational messages.  This is mostly information like
+  ///      'disconnect was called' or 'SASL auth succeeded'.
+  ///    WARN - Warnings about potential problems.  This is mostly used
+  ///      to report transient connection errors like request timeouts.
+  ///    ERROR - Some error occurred.
+  ///    FATAL - A non-recoverable fatal error occurred.
+  ///
+  ///  Parameters:
+  ///    (Integer) level - The log level of the log message.  This will
+  ///      be one of the values in Strophe.LogLevel.
+  ///    (String) msg - The log message.
+  static void log(int level, String msg) {
+    // if (level != Strophe.LogLevel['FATAL']) {
+    print(msg);
+    // }
   }
 
-  /** Function: debug
-   *  Log a message at the Strophe.LogLevel.DEBUG level.
-   *
-   *  Parameters:
-   *    (String) msg - The log message.
-   */
-  static debug(String msg) {
+  /// Function: debug
+  ///  Log a message at the Strophe.LogLevel.DEBUG level.
+  ///
+  ///  Parameters:
+  ///    (String) msg - The log message.
+  static void debug(String msg) {
     Strophe.log(Strophe.LogLevel['DEBUG'], msg);
   }
 
-  /** Function: info
-   *  Log a message at the Strophe.LogLevel.INFO level.
-   *
-   *  Parameters:
-   *    (String) msg - The log message.
-   */
-  static info(String msg) {
+  /// Function: info
+  ///  Log a message at the Strophe.LogLevel.INFO level.
+  ///
+  ///  Parameters:
+  ///    (String) msg - The log message.
+  static void info(String msg) {
     Strophe.log(Strophe.LogLevel['INFO'], msg);
   }
 
-  /** Function: warn
-   *  Log a message at the Strophe.LogLevel.WARN level.
-   *
-   *  Parameters:
-   *    (String) msg - The log message.
-   */
-  static warn(String msg) {
+  /// Function: warn
+  ///  Log a message at the Strophe.LogLevel.WARN level.
+  ///
+  ///  Parameters:
+  ///    (String) msg - The log message.
+  static void warn(String msg) {
     Strophe.log(Strophe.LogLevel['WARN'], msg);
   }
 
-  /** Function: error
-   *  Log a message at the Strophe.LogLevel.ERROR level.
-   *
-   *  Parameters:
-   *    (String) msg - The log message.
-   */
-  static error(String msg) {
+  /// Function: error
+  ///  Log a message at the Strophe.LogLevel.ERROR level.
+  ///
+  ///  Parameters:
+  ///    (String) msg - The log message.
+  static void error(String msg) {
     Strophe.log(Strophe.LogLevel['ERROR'], msg);
   }
 
-  /** Function: fatal
-   *  Log a message at the Strophe.LogLevel.FATAL level.
-   *
-   *  Parameters:
-   *    (String) msg - The log message.
-   */
-  static fatal(String msg) {
+  /// Function: fatal
+  ///  Log a message at the Strophe.LogLevel.FATAL level.
+  ///
+  ///  Parameters:
+  ///    (String) msg - The log message.
+  static void fatal(String msg) {
     Strophe.log(Strophe.LogLevel['FATAL'], msg);
   }
 
-  /** Function: serialize
-   *  Render a DOM element and all descendants to a String.
-   *
-   *  Parameters:
-   *    (XMLElement) elem - A DOM element.
-   *
-   *  Returns:
-   *    The serialized element tree as a String.
-   */
+  /// Function: serialize
+  ///  Render a DOM element and all descendants to a String.
+  ///
+  ///  Parameters:
+  ///    (XMLElement) elem - A DOM element.
+  ///
+  ///  Returns:
+  ///    The serialized element tree as a String.
   static String serialize(xml.XmlNode elem) {
     if (elem == null) {
       return null;
@@ -816,77 +797,24 @@ class Strophe {
     return elem.toXmlString();
   }
 
-  /** PrivateVariable: _requestId
-   *  _Private_ variable that keeps track of the request ids for
-   *  connections.
-   */
-  static int requestId = 0;
+  /// PrivateVariable: _requestId
+  ///  _Private_ variable that keeps track of the request ids for
+  ///  connections.
+  static int _requestId = 0;
 
-  /** PrivateVariable: Strophe.connectionPlugins
-   *  _Private_ variable Used to store plugin names that need
-   *  initialization on Strophe.Connection construction.
-   */
+  /// PrivateVariable: Strophe.connectionPlugins
+  ///  _Private_ variable Used to store plugin names that need
+  ///  initialization on Strophe.Connection construction.
   static Map<String, PluginClass> _connectionPlugins = {};
 
-  static Map<String, PluginClass> get connectionPlugins {
-    return _connectionPlugins;
-  }
-
-  /** Function: addConnectionPlugin
-   *  Extends the Strophe.Connection object with the given plugin.
-   *
-   *  Parameters:
-   *    (String) name - The name of the extension.
-   *    (Object) ptype - The plugin's prototype.
-   */
+  /// Function: addConnectionPlugin
+  ///  Extends the Strophe.Connection object with the given plugin.
+  ///
+  ///  Parameters:
+  ///    (String) name - The name of the extension.
+  ///    (Object) ptype - The plugin's prototype.
   static void addConnectionPlugin(String name, ptype) {
     Strophe._connectionPlugins[name] = ptype;
-  }
-
-  /** Class: Strophe.Builder
-   *  XML DOM builder.
-   *
-   *  This object provides an interface similar to JQuery but for building
-   *  DOM elements easily and rapidly.  All the functions except for toString()
-   *  and tree() return the object, so calls can be chained.  Here's an
-   *  example using the $iq() builder helper.
-   *  > $iq({to: 'you', from: 'me', type: 'get', id: '1'})
-   *  >     .c('query', {xmlns: 'strophe:example'})
-   *  >     .c('example')
-   *  >     .toString()
-   *
-   *  The above generates this XML fragment
-   *  > <iq to='you' from='me' type='get' id='1'>
-   *  >   <query xmlns='strophe:example'>
-   *  >     <example/>
-   *  >   </query>
-   *  > </iq>
-   *  The corresponding DOM manipulations to get a similar fragment would be
-   *  a lot more tedious and probably involve several helper variables.
-   *
-   *  Since adding children makes new operations operate on the child, up()
-   *  is provided to traverse up the tree.  To add two children, do
-   *  > builder.c('child1', ...).up().c('child2', ...)
-   *  The next operation on the Builder will be relative to the second child.
-   */
-
-  /** Constructor: Strophe.Builder
-   *  Create a Strophe.Builder object.
-   *
-   *  The attributes should be passed in object notation.  For example
-   *  > var b = new Builder('message', {to: 'you', from: 'me'});
-   *  or
-   *  > var b = new Builder('messsage', {'xml:lang': 'en'});
-   *
-   *  Parameters:
-   *    (String) name - The name of the root element.
-   *    (Object) attrs - The attributes for the root element in object notation.
-   *
-   *  Returns:
-   *    A new Strophe.Builder.
-   */
-  static StanzaBuilder Builder(String name, {Map<String, dynamic> attrs}) {
-    return StanzaBuilder(name, attrs);
   }
 
   /** PrivateClass: Strophe.Handler
@@ -903,21 +831,20 @@ class Strophe {
    *  Strophe.Connection.deleteHandler().
    */
 
-  /** PrivateConstructor: Strophe.Handler
-   *  Create and initialize a new Strophe.Handler.
-   *
-   *  Parameters:
-   *    (Function) handler - A function to be executed when the handler is run.
-   *    (String) ns - The namespace to match.
-   *    (String) name - The element name to match.
-   *    (String) type - The element type to match.
-   *    (String) id - The element id attribute to match.
-   *    (String) from - The element from attribute to match.
-   *    (Object) options - Handler options
-   *
-   *  Returns:
-   *    A new Strophe.Handler object.
-   */
+  /// PrivateConstructor: Strophe.Handler
+  ///  Create and initialize a new Strophe.Handler.
+  ///
+  ///  Parameters:
+  ///    (Function) handler - A function to be executed when the handler is run.
+  ///    (String) ns - The namespace to match.
+  ///    (String) name - The element name to match.
+  ///    (String) type - The element type to match.
+  ///    (String) id - The element id attribute to match.
+  ///    (String) from - The element from attribute to match.
+  ///    (Object) options - Handler options
+  ///
+  ///  Returns:
+  ///    A new Strophe.Handler object.
   static StanzaHandler Handler(Function handler, String ns, String name,
       [type, String id, String from, Map options]) {
     if (options != null) {
