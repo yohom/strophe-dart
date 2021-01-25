@@ -1,8 +1,9 @@
 import 'package:strophe/src/Strophe.Builder.dart';
+import 'package:strophe/src/Strophe.Handler.dart';
+import 'package:strophe/src/Strophe.TimedHandler.dart';
 import 'package:strophe/src/bosh.dart';
 import 'package:strophe/src/enums.dart';
 import 'package:strophe/src/plugins/plugins.dart';
-import 'package:strophe/src/stanza_handler.dart';
 import 'package:strophe/src/websocket.dart';
 import 'package:xml/xml.dart' as xml;
 
@@ -847,7 +848,7 @@ class Strophe {
   ///  Returns:
   ///    A new Strophe.Handler object.
   ///
-  static StanzaHandler Handler(Function handler, String ns, String name,
+  static StropheHandler Handler(Function handler, String ns, String name,
       [type, String id, String from, Map options]) {
     if (options != null) {
       options.putIfAbsent('matchBareFromJid',
@@ -855,58 +856,59 @@ class Strophe {
       options.putIfAbsent('ignoreNamespaceFragment', () => false);
     } else
       options = {'matchBareFromJid': false, 'ignoreNamespaceFragment': false};
-    StanzaHandler stanzaHandler =
-        StanzaHandler(handler, ns, name, type, id, options);
+    StropheHandler stropheHandler =
+        StropheHandler(handler, ns, name, type, id, options);
     // BBB: Maintain backward compatibility with old `matchBare` option
-    if (stanzaHandler.options['matchBare'] != null) {
+    if (stropheHandler.options['matchBare'] != null) {
       Strophe.warn(
           'The "matchBare" option is deprecated, use "matchBareFromJid" instead.');
-      stanzaHandler.options['matchBareFromJid'] =
-          stanzaHandler.options['matchBare'];
-      stanzaHandler.options.remove('matchBare');
+      stropheHandler.options['matchBareFromJid'] =
+          stropheHandler.options['matchBare'];
+      stropheHandler.options.remove('matchBare');
     }
 
-    if (stanzaHandler.options['matchBareFromJid'] != null &&
-        stanzaHandler.options['matchBareFromJid'] == true) {
-      stanzaHandler.from = (from != null && from.isNotEmpty)
+    if (stropheHandler.options['matchBareFromJid'] != null &&
+        stropheHandler.options['matchBareFromJid'] == true) {
+      stropheHandler.from = (from != null && from.isNotEmpty)
           ? Strophe.getBareJidFromJid(from)
           : null;
     } else {
-      stanzaHandler.from = from;
+      stropheHandler.from = from;
     }
     // whether the handler is a user handler or a system handler
-    stanzaHandler.user = true;
-    return stanzaHandler;
+    stropheHandler.user = true;
+    return stropheHandler;
   }
 
-  /** PrivateClass: Strophe.TimedHandler
-   *  _Private_ helper class for managing timed handlers.
-   *
-   *  A Strophe.TimedHandler encapsulates a user provided callback that
-   *  should be called after a certain period of time or at regular
-   *  intervals.  The return value of the callback determines whether the
-   *  Strophe.TimedHandler will continue to fire.
-   *
-   *  Users will not use Strophe.TimedHandler objects directly, but instead
-   *  they will use Strophe.Connection.addTimedHandler() and
-   *  Strophe.Connection.deleteTimedHandler().
-   */
+  /// PrivateClass: Strophe.TimedHandler
+  /// _Private_ helper class for managing timed handlers.
+  ///
+  /// A Strophe.TimedHandler encapsulates a user provided callback that
+  /// should be called after a certain period of time or at regular
+  /// intervals.  The return value of the callback determines whether the
+  /// Strophe.TimedHandler will continue to fire.
+  ///
+  /// Users will not use Strophe.TimedHandler objects directly, but instead
+  /// they will use Strophe.Connection.addTimedHandler() and
+  /// Strophe.Connection.deleteTimedHandler().
+  ///
 
-  /** PrivateConstructor: Strophe.TimedHandler
-   *  Create and initialize a new Strophe.TimedHandler object.
-   *
-   *  Parameters:
-   *    (Integer) period - The number of milliseconds to wait before the
-   *      handler is called.
-   *    (Function) handler - The callback to run when the handler fires.  This
-   *      function should take no arguments.
-   *
-   *  Returns:
-   *    A new Strophe.TimedHandler object.
-   */
-  static StanzaTimedHandler TimedHandler(int period, Function handler) {
-    StanzaTimedHandler stanzaTimedHandler = StanzaTimedHandler(period, handler);
-    return stanzaTimedHandler;
+  /// PrivateConstructor: Strophe.TimedHandler
+  /// Create and initialize a new Strophe.TimedHandler object.
+  ///
+  /// Parameters:
+  ///   (Integer) period - The number of milliseconds to wait before the
+  ///     handler is called.
+  ///   (Function) handler - The callback to run when the handler fires.  This
+  ///     function should take no arguments.
+  ///
+  /// Returns:
+  ///   A new Strophe.TimedHandler object.
+  ///
+  static StropheTimedHandler TimedHandler(int period, Function handler) {
+    StropheTimedHandler stropheTimedHandler =
+        StropheTimedHandler(period, handler);
+    return stropheTimedHandler;
   }
 
   /** Class: Strophe.Connection
