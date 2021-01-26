@@ -1,11 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
-import 'package:strophe/src/bosh.dart';
-import 'package:strophe/src/core.dart';
+import 'package:strophe/src/core/Strophe.Connection.dart';
 import 'package:strophe/src/md5.dart';
 import 'package:strophe/src/plugins/administration.dart';
 import 'package:strophe/src/plugins/bookmark.dart';
@@ -15,18 +12,15 @@ import 'package:strophe/src/plugins/disco.dart';
 import 'package:strophe/src/plugins/last-activity.dart';
 import 'package:strophe/src/plugins/muc.dart';
 import 'package:strophe/src/plugins/pep.dart';
-import 'package:strophe/src/plugins/plugins.dart';
 import 'package:strophe/src/plugins/privacy.dart';
 import 'package:strophe/src/plugins/private-storage.dart';
 import 'package:strophe/src/plugins/pubsub.dart';
 import 'package:strophe/src/plugins/register.dart';
 import 'package:strophe/src/plugins/roster.dart';
 import 'package:strophe/src/plugins/vcard-temp.dart';
-import 'package:strophe/src/sessionstorage.dart';
 import 'package:strophe/src/sha1.dart';
 import 'package:strophe/src/utils.dart';
 import 'package:xml/xml.dart' as xml;
-import 'package:xml/xml.dart';
 
 /** Class: Strophe.SASLMechanism
  *

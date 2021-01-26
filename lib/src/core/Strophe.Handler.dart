@@ -1,4 +1,4 @@
-import 'package:strophe/src/core.dart';
+import 'package:strophe/src/core/core.dart';
 import 'package:xml/xml.dart' as xml;
 
 class StropheHandler {

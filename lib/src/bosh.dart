@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:http/http.dart' as http;
-import 'package:strophe/src/core.dart';
+import 'package:strophe/src/core/Strophe.Builder.dart';
+import 'package:strophe/src/core/Strophe.Connection.dart';
+import 'package:strophe/src/core/core.dart';
+import 'package:strophe/src/core/sessionstorage.dart';
 import 'package:strophe/src/enums.dart';
-import 'package:strophe/src/sessionstorage.dart';
 import 'package:xml/xml.dart' as xml;
 
 class StropheBosh extends ServiceType {
@@ -72,8 +74,8 @@ class StropheBosh extends ServiceType {
    *  Returns:
    *    A Strophe.Builder with a <body/> element.
    */
-  StanzaBuilder _buildBody() {
-    StanzaBuilder bodyWrap = Strophe.$build(
+  StropheBuilder _buildBody() {
+    StropheBuilder bodyWrap = Strophe.$build(
         'body', {'rid': this.rid++, 'xmlns': Strophe.NS['HTTPBIND']});
     if (this.sid != null) {
       bodyWrap = bodyWrap.attrs({'sid': this.sid});
@@ -455,7 +457,7 @@ class StropheBosh extends ServiceType {
     }
 
     if (this._requests.length < 2 && data.length > 0) {
-      StanzaBuilder body = this._buildBody();
+      StropheBuilder body = this._buildBody();
       for (int i = 0; i < data.length; i++) {
         if (data[i] != null) {
           if (data[i] == "restart") {
@@ -828,7 +830,7 @@ class StropheBosh extends ServiceType {
    */
   _sendTerminate(pres) {
     Strophe.info("_sendTerminate was called");
-    StanzaBuilder body = this._buildBody().attrs({'type': "terminate"});
+    StropheBuilder body = this._buildBody().attrs({'type': "terminate"});
     if (pres) {
       body.cnode(pres.tree());
     }

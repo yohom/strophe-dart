@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:strophe/src/core.dart';
+import 'package:strophe/src/core/Strophe.Builder.dart';
+import 'package:strophe/src/core/Strophe.Connection.dart';
+import 'package:strophe/src/core/core.dart';
 import 'package:strophe/src/enums.dart';
 import 'package:xml/xml.dart' as xml;
 
@@ -56,7 +58,7 @@ class StropheWebSocket extends ServiceType {
   ///  Returns:
   ///    A Strophe.Builder with a <stream> element.
   ///
-  StanzaBuilder _buildStream() {
+  StropheBuilder _buildStream() {
     return Strophe.$build("open", {
       "xmlns": Strophe.NS['FRAMING'],
       "to": this._conn.domain,
@@ -276,13 +278,13 @@ class StropheWebSocket extends ServiceType {
   ///
   /// Parameters:
   /// (Request) pres - This stanza will be sent before disconnecting.
-  void _disconnect([StanzaBuilder pres]) {
+  void _disconnect([StropheBuilder pres]) {
     if (this.socket != null && this.socket.readyState != WebSocket.closed) {
       if (pres != null) {
         this._conn.send(pres.tree());
       }
 
-      StanzaBuilder close =
+      StropheBuilder close =
           Strophe.$build("close", {"xmlns": Strophe.NS['FRAMING']});
       this._conn.xmlOutput(close.tree());
       String closeString = Strophe.serialize(close.tree());
@@ -494,7 +496,7 @@ class StropheWebSocket extends ServiceType {
   ///
   /// The opening stream tag is sent here.
   _onOpen() {
-    StanzaBuilder start = this._buildStream();
+    StropheBuilder start = this._buildStream();
     this._conn.xmlOutput(start.tree());
 
     String startString = Strophe.serialize(start.tree());

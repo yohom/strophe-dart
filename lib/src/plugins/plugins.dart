@@ -1,4 +1,4 @@
-import 'package:strophe/src/enums.dart';
+import 'package:strophe/src/core/Strophe.Connection.dart';
 
 abstract class PluginClass {
   StropheConnection connection;

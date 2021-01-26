@@ -1,7 +1,8 @@
-import 'package:strophe/src/Strophe.Builder.dart';
-import 'package:strophe/src/Strophe.Handler.dart';
-import 'package:strophe/src/Strophe.TimedHandler.dart';
 import 'package:strophe/src/bosh.dart';
+import 'package:strophe/src/core/Strophe.Builder.dart';
+import 'package:strophe/src/core/Strophe.Connection.dart';
+import 'package:strophe/src/core/Strophe.Handler.dart';
+import 'package:strophe/src/core/Strophe.TimedHandler.dart';
 import 'package:strophe/src/enums.dart';
 import 'package:strophe/src/plugins/plugins.dart';
 import 'package:strophe/src/websocket.dart';
