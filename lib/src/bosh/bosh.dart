@@ -154,6 +154,7 @@ class StropheBosh extends ServiceType {
         route: route,
       });
     }
+
     StropheRequest req =
         StropheRequest(body.tree(), null, body.tree().getAttribute('rid'));
     // We must set it after creating req so that we can pass it to
@@ -188,13 +189,15 @@ class StropheBosh extends ServiceType {
   ///      should almost always be set to 1 (the default).
   ///    (Integer) wind - The optional HTTBIND window value.  This is the
   ///      allowed range of request ids that are valid.  The default is 5.
-  void attach(String jid, String sid, int rid, Function callback, int wait,
-      int hold, int wind) {
-    this._attach(jid, sid, rid, callback, wait, hold, wind);
-  }
-
-  _attach(String jid, String sid, int rid, Function callback, int wait,
-      int hold, int wind) {
+  void _attach(
+    String jid,
+    String sid,
+    int rid,
+    Function callback,
+    int wait,
+    int hold,
+    int wind,
+  ) {
     this._conn.jid = jid;
     this.sid = sid;
     this.rid = rid;
@@ -213,36 +216,41 @@ class StropheBosh extends ServiceType {
     this._conn.changeConnectStatus(Strophe.Status['ATTACHED'], null);
   }
 
-  /** PrivateFunction: _restore
-   *  Attempt to restore a cached BOSH session
-   *
-   *  Parameters:
-   *    (String) jid - The full JID that is bound by the session.
-   *      This parameter is optional but recommended, specifically in cases
-   *      where prebinded BOSH sessions are used where it's important to know
-   *      that the right session is being restored.
-   *    (Function) callback The connect callback function.
-   *    (Integer) wait - The optional HTTPBIND wait value.  This is the
-   *      time the server will wait before returning an empty result for
-   *      a request.  The default setting of 60 seconds is recommended.
-   *      Other settings will require tweaks to the Strophe.TIMEOUT value.
-   *    (Integer) hold - The optional HTTPBIND hold value.  This is the
-   *      number of connections the server will hold at one time.  This
-   *      should almost always be set to 1 (the default).
-   *    (Integer) wind - The optional HTTBIND window value.  This is the
-   *      allowed range of request ids that are valid.  The default is 5.
-   */
-  void restore(String jid, Function callback, int wait, int hold, int wind) {
-    this._restore(jid, callback, wait, hold, wind);
-  }
-
-  _restore(String jid, Function callback, int wait, int hold, int wind) {
+  /// PrivateFunction: _restore
+  /// Attempt to restore a cached BOSH session
+  ///
+  /// Parameters:
+  ///   (String) jid - The full JID that is bound by the session.
+  ///     This parameter is optional but recommended, specifically in cases
+  ///     where prebinded BOSH sessions are used where it's important to know
+  ///     that the right session is being restored.
+  ///   (Function) callback The connect callback function.
+  ///   (Integer) wait - The optional HTTPBIND wait value.  This is the
+  ///     time the server will wait before returning an empty result for
+  ///     a request.  The default setting of 60 seconds is recommended.
+  ///     Other settings will require tweaks to the Strophe.TIMEOUT value.
+  ///   (Integer) hold - The optional HTTPBIND hold value.  This is the
+  ///     number of connections the server will hold at one time.  This
+  ///     should almost always be set to 1 (the default).
+  ///   (Integer) wind - The optional HTTBIND window value.  This is the
+  ///     allowed range of request ids that are valid.  The default is 5.
+  ///
+  void _restore(
+    String jid,
+    Function callback,
+    int wait,
+    int hold,
+    int wind,
+  ) {
     var session =
         JsonCodec().decode(SessionStorage.getItem('strophe-bosh-session'));
     if (session != null &&
-        session.rid &&
-        session.sid &&
-        session.jid &&
+        session.rid != null &&
+        session.rid > 0 &&
+        session.sid != null &&
+        session.sid.isNotEmpty &&
+        session.jid != null &&
+        session.jid.isNotEmpty && // TODO: finish this IF
         (jid == null ||
             Strophe.getBareJidFromJid(session.jid) ==
                 Strophe.getBareJidFromJid(jid) ||
