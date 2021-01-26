@@ -1733,7 +1733,7 @@ class StropheConnection {
   /// Returns:
   ///   false to remove the handler.
   ///
-  bool _saslAuth1Cb(element) {
+  bool _saslAuth1Cb(XmlNode element) {
     // save stream:features for future usage
     xml.XmlElement elem = element is xml.XmlDocument
         ? element.rootElement
@@ -1791,6 +1791,7 @@ class StropheConnection {
       return false;
     }
 
+    // TODO - need to grab errors
     List<xml.XmlElement> bind = elem.findAllElements("bind").toList();
     List<xml.XmlElement> jidNode;
     if (bind.length > 0) {
@@ -1817,74 +1818,18 @@ class StropheConnection {
     }
   }
 
-  set connexionError(RawInputCallback callback) {
-    this._connexionErrorInputCallback = callback;
-  }
-
-  RawInputCallback get connexionError {
-    return this._connexionErrorInputCallback;
-  }
-
-  /// Sends an IQ immediately if connected or puts it on the send queue otherwise(in contrary to other send methods
-  /// which would fail immediately if disconnected).
-  /// @param {Element} iq - The IQ to send.
-  /// @param {number} timeout - How long to wait for the response. The time when the connection is reconnecting is
-  /// included, which means that the IQ may never be sent and still fail with a timeout.
-
-  String sendIQ2(
-    xml.XmlNode el, {
-    Function(XmlElement stanza) onSuccess,
-    Function(XmlElement stanza) onError,
-    int timeout,
-  }) {
-    if (connected) {
-      return sendIQ(
-        el,
-        onSuccess,
-        onError,
-        timeout,
-      );
-    } else {
-      debugPrint('sendIQ2; not connected');
-      return null; // todo: impl
-    }
-  }
-
-  /** PrivateFunction: _no_auth_received
-   *
-   * Called on stream start/restart when no stream:features
-   * has been received or when no viable authentication mechanism is offered.
-   *
-   * Sends a blank poll request.
-   */
-  Function get noAuthReceived {
-    return _noAuthReceived;
-  }
-
-  _noAuthReceived([Function _callback]) {
-    String errorMsg =
-        "Server did not offer a supported authentication mechanism";
-    Strophe.error(errorMsg);
-    this._changeConnectStatus(
-        Strophe.Status['CONNFAIL'], Strophe.ErrorCondition['NO_AUTH_MECH']);
-    if (_callback != null) {
-      _callback();
-    }
-    this._doDisconnect();
-  }
-
-  /** PrivateFunction: _saslSessionCb
-   *  _Private_ handler to finish successful SASL connection.
-   *
-   *  This sets Connection.authenticated to true on success, which
-   *  starts the processing of user handlers.
-   *
-   *  Parameters:
-   *    (XMLElement) elem - The matching stanza.
-   *
-   *  Returns:
-   *    false to remove the handler.
-   */
+  /// PrivateFunction: _saslSessionCb
+  /// _Private_ handler to finish successful SASL connection.
+  ///
+  /// This sets Connection.authenticated to true on success, which
+  /// starts the processing of user handlers.
+  ///
+  /// Parameters:
+  ///   (XMLElement) elem - The matching stanza.
+  ///
+  /// Returns:
+  ///   false to remove the handler.
+  ///
   bool _saslSessionCb(xml.XmlElement elem) {
     if (elem.getAttribute("type") == "result") {
       this.authenticated = true;
@@ -1897,16 +1842,15 @@ class StropheConnection {
     return false;
   }
 
-  /** PrivateFunction: _saslFailureCb
-   *  _Private_ handler for SASL authentication failure.
-   *
-   *  Parameters:
-   *    (XMLElement) elem - The matching stanza.
-   *
-   *  Returns:
-   *    false to remove the handler.
-   */
-  /* jshint unused:false */
+  /// PrivateFunction: _saslFailureCb
+  /// _Private_ handler for SASL authentication failure.
+  ///
+  /// Parameters:
+  ///   (XMLElement) elem - The matching stanza.
+  ///
+  /// Returns:
+  ///   false to remove the handler.
+  ///
   _saslFailureCb([xml.XmlElement elem]) {
     // delete unneeded handlers
     if (this._saslSuccessHandler != null) {
@@ -1918,25 +1862,25 @@ class StropheConnection {
       this._saslChallengeHandler = null;
     }
 
-    if (this._saslMechanism != null) this._saslMechanism.onFailure();
+    if (this._saslMechanism != null) {
+      this._saslMechanism.onFailure();
+    }
     this._changeConnectStatus(Strophe.Status['AUTHFAIL'], null, elem);
     return false;
   }
 
-  /* jshint unused:true */
-
-  /** PrivateFunction: _auth2Cb
-   *  _Private_ handler to finish legacy authentication.
-   *
-   *  This handler is called when the result from the jabber:iq:auth
-   *  <iq/> stanza is returned.
-   *
-   *  Parameters:
-   *    (XMLElement) elem - The stanza this triggered the callback.
-   *
-   *  Returns:
-   *    false to remove the handler.
-   */
+  /// PrivateFunction: _auth2Cb
+  /// _Private_ handler to finish legacy authentication.
+  ///
+  /// This handler is called when the result from the jabber:iq:auth
+  /// <iq/> stanza is returned.
+  ///
+  /// Parameters:
+  ///   (XMLElement) elem - The stanza this triggered the callback.
+  ///
+  /// Returns:
+  ///   false to remove the handler.
+  ///
   bool _auth2Cb(xml.XmlElement elem) {
     if (elem.getAttribute("type") == "result") {
       this.authenticated = true;
@@ -1948,65 +1892,66 @@ class StropheConnection {
     return false;
   }
 
-  /** PrivateFunction: _addSysTimedHandler
-   *  _Private_ function to add a system level timed handler.
-   *
-   *  This function is used to add a Strophe.TimedHandler for the
-   *  library code.  System timed handlers are allowed to run before
-   *  authentication is complete.
-   *
-   *  Parameters:
-   *    (Integer) period - The period of the handler.
-   *    (Function) handler - The callback function.
-   */
-  StanzaTimedHandler _addSysTimedHandler(int period, Function handler) {
-    StanzaTimedHandler thand = Strophe.TimedHandler(period, handler);
+  /// PrivateFunction: _addSysTimedHandler
+  /// _Private_ function to add a system level timed handler.
+  ///
+  /// This function is used to add a Strophe.TimedHandler for the
+  /// library code.  System timed handlers are allowed to run before
+  /// authentication is complete.
+  ///
+  /// Parameters:
+  ///   (Integer) period - The period of the handler.
+  ///   (Function) handler - The callback function.
+  ///
+  StropheTimedHandler _addSysTimedHandler(int period, Function handler) {
+    StropheTimedHandler thand = Strophe.TimedHandler(period, handler);
     thand.user = false;
     this.addTimeds.add(thand);
     return thand;
   }
 
-  /** PrivateFunction: _addSysHandler
-   *  _Private_ function to add a system level stanza handler.
-   *
-   *  This function is used to add a Strophe.Handler for the
-   *  library code.  System stanza handlers are allowed to run before
-   *  authentication is complete.
-   *
-   *  Parameters:
-   *    (Function) handler - The callback function.
-   *    (String) ns - The namespace to match.
-   *    (String) name - The stanza name to match.
-   *    (String) type - The stanza type attribute to match.
-   *    (String) id - The stanza id attribute to match.
-   */
-  StanzaHandler addSysHandler(
+  /// PrivateFunction: _addSysHandler
+  /// _Private_ function to add a system level stanza handler.
+  ///
+  /// This function is used to add a Strophe.Handler for the
+  /// library code.  System stanza handlers are allowed to run before
+  /// authentication is complete.
+  ///
+  /// Parameters:
+  ///   (Function) handler - The callback function.
+  ///   (String) ns - The namespace to match.
+  ///   (String) name - The stanza name to match.
+  ///   (String) type - The stanza type attribute to match.
+  ///   (String) id - The stanza id attribute to match.
+  ///
+  StropheHandler addSysHandler(
       Function handler, String ns, String name, String type, String id) {
     return _addSysHandler(handler, ns, name, type, id);
   }
 
-  StanzaHandler _addSysHandler(
+  StropheHandler _addSysHandler(
       Function handler, String ns, String name, String type, String id) {
-    StanzaHandler hand = Strophe.Handler(handler, ns, name, type, id);
+    StropheHandler hand = Strophe.Handler(handler, ns, name, type, id);
     hand.user = false;
     this.addHandlers.add(hand);
     return hand;
   }
 
-  /** PrivateFunction: _onDisconnectTimeout
-   *  _Private_ timeout handler for handling non-graceful disconnection.
-   *
-   *  If the graceful disconnect process does not complete within the
-   *  time allotted, this handler finishes the disconnect anyway.
-   *
-   *  Returns:
-   *    false to remove the handler.
-   */
+  /// PrivateFunction: _onDisconnectTimeout
+  /// _Private_ timeout handler for handling non-graceful disconnection.
+  ///
+  /// If the graceful disconnect process does not complete within the
+  /// time allotted, this handler finishes the disconnect anyway.
+  ///
+  /// Returns:
+  ///   false to remove the handler.
+  ///
   bool onDisconnectTimeout() {
     return _onDisconnectTimeout();
   }
 
   bool _onDisconnectTimeout() {
+    Strophe.info("_onDisconnectTimeout was called");
     this._changeConnectStatus(Strophe.Status['CONNTIMEOUT'], null);
     this._proto.onDisconnectTimeout();
     // actually disconnect
@@ -2014,12 +1959,12 @@ class StropheConnection {
     return false;
   }
 
-  /** PrivateFunction: _onIdle
-   *  _Private_ handler to process events during idle cycle.
-   *
-   *  This handler is called every 100ms to fire timed handlers this
-   *  are ready and keep poll requests going.
-   */
+  /// PrivateFunction: _onIdle
+  /// _Private_ handler to process events during idle cycle.
+  ///
+  /// This handler is called every 100ms to fire timed handlers this
+  /// are ready and keep poll requests going.
+  ///
   onIdle() {
     this._onIdle();
   }
@@ -2027,8 +1972,8 @@ class StropheConnection {
   _onIdle() {
     int i;
     int since;
-    List<StanzaTimedHandler> newList;
-    StanzaTimedHandler thand;
+    List<StropheTimedHandler> newList;
+    StropheTimedHandler thand;
     // add timed handlers scheduled for addition
     // NOTE: we add before remove in the case a timed handler is
     // added and then deleted before the next _onIdle() call.
@@ -2046,7 +1991,7 @@ class StropheConnection {
     }
 
     // call ready timed handlers
-    int now = new DateTime.now().millisecondsSinceEpoch;
+    int now = DateTime.now().millisecondsSinceEpoch;
     newList = [];
     for (i = 0; i < this.timedHandlers.length; i++) {
       thand = this.timedHandlers[i];
@@ -2066,12 +2011,45 @@ class StropheConnection {
     this._idleTimeout.cancel();
 
     this._proto.onIdle();
+
     // reactivate the timer only if connected
     if (this.connected) {
       // XXX: setTimeout should be called only with function expressions (23974bc1)
-      this._idleTimeout = new Timer(new Duration(milliseconds: 100), () {
+      this._idleTimeout = Timer(Duration(milliseconds: 100), () {
         this._onIdle();
       });
     }
+  }
+
+// TODO: review if needed
+  // set connexionError(RawInputCallback callback) {
+  //   this._connexionErrorInputCallback = callback;
+  // }
+
+  // RawInputCallback get connexionError {
+  //   return this._connexionErrorInputCallback;
+  // }
+
+  ///  PrivateFunction: _no_auth_received
+  ///
+  /// Called on stream start/restart when no stream:features
+  /// has been received or when no viable authentication mechanism is offered.
+  ///
+  /// Sends a blank poll request.
+  /// TODO: put this in to the bosh.dart file
+  Function get noAuthReceived {
+    return _noAuthReceived;
+  }
+
+  _noAuthReceived([Function _callback]) {
+    String errorMsg =
+        "Server did not offer a supported authentication mechanism";
+    Strophe.error(errorMsg);
+    this._changeConnectStatus(
+        Strophe.Status['CONNFAIL'], Strophe.ErrorCondition['NO_AUTH_MECH']);
+    if (_callback != null) {
+      _callback();
+    }
+    this._doDisconnect();
   }
 }
