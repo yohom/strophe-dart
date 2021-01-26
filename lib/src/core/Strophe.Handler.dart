@@ -1,6 +1,35 @@
 import 'package:strophe/src/core/core.dart';
 import 'package:xml/xml.dart' as xml;
 
+///  PrivateClass: Strophe.Handler
+///  _Private_ helper class for managing stanza handlers.
+///
+///  A Strophe.Handler encapsulates a user provided callback function to be
+///  executed when matching stanzas are received by the connection.
+///  Handlers can be either one-off or persistant depending on their
+///  return value. Returning true will cause a Handler to remain active, and
+///  returning false will remove the Handler.
+///
+///  Users will not use Strophe.Handler objects directly, but instead they
+///  will use Strophe.Connection.addHandler() and
+///  Strophe.Connection.deleteHandler().
+///
+
+/// PrivateConstructor: Strophe.Handler
+///  Create and initialize a new Strophe.Handler.
+///
+///  Parameters:
+///    (Function) handler - A function to be executed when the handler is run.
+///    (String) ns - The namespace to match.
+///    (String) name - The element name to match.
+///    (String) type - The element type to match.
+///    (String) id - The element id attribute to match.
+///    (String) from - The element from attribute to match.
+///    (Object) options - Handler options
+///
+///  Returns:
+///    A new Strophe.Handler object.
+///
 class StropheHandler {
   String from;
 
@@ -16,6 +45,38 @@ class StropheHandler {
   StropheHandler(
       this.handler, this.ns, this.name, ptype, this.id, this.options) {
     this.type = ptype is List ? ptype : [ptype];
+  }
+
+  factory StropheHandler.handler(Function handler, String ns, String name,
+      [type, String id, String from, Map options]) {
+    if (options != null) {
+      options.putIfAbsent('matchBareFromJid', () => false);
+      options.putIfAbsent('ignoreNamespaceFragment', () => false);
+    } else {
+      options = {'matchBareFromJid': false, 'ignoreNamespaceFragment': false};
+    }
+    StropheHandler stropheHandler =
+        StropheHandler(handler, ns, name, type, id, options);
+    // BBB: Maintain backward compatibility with old `matchBare` option
+    if (stropheHandler.options['matchBare'] != null) {
+      Strophe.warn(
+          'The "matchBare" option is deprecated, use "matchBareFromJid" instead.');
+      stropheHandler.options['matchBareFromJid'] =
+          stropheHandler.options['matchBare'];
+      stropheHandler.options.remove('matchBare');
+    }
+
+    if (stropheHandler.options['matchBareFromJid'] != null &&
+        stropheHandler.options['matchBareFromJid'] == true) {
+      stropheHandler.from = (from != null && from.isNotEmpty)
+          ? Strophe.getBareJidFromJid(from)
+          : null;
+    } else {
+      stropheHandler.from = from;
+    }
+    // whether the handler is a user handler or a system handler
+    stropheHandler.user = true;
+    return stropheHandler;
   }
 
   /// PrivateFunction: getNamespace

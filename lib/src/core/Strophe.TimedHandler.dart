@@ -1,3 +1,28 @@
+/// PrivateClass: Strophe.TimedHandler
+/// _Private_ helper class for managing timed handlers.
+///
+/// A Strophe.TimedHandler encapsulates a user provided callback that
+/// should be called after a certain period of time or at regular
+/// intervals.  The return value of the callback determines whether the
+/// Strophe.TimedHandler will continue to fire.
+///
+/// Users will not use Strophe.TimedHandler objects directly, but instead
+/// they will use Strophe.Connection.addTimedHandler() and
+/// Strophe.Connection.deleteTimedHandler().
+///
+
+/// PrivateConstructor: Strophe.TimedHandler
+/// Create and initialize a new Strophe.TimedHandler object.
+///
+/// Parameters:
+///   (Integer) period - The number of milliseconds to wait before the
+///     handler is called.
+///   (Function) handler - The callback to run when the handler fires.  This
+///     function should take no arguments.
+///
+/// Returns:
+///   A new Strophe.TimedHandler object.
+///
 class StropheTimedHandler {
   int period;
   Function handler;
