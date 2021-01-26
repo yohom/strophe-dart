@@ -1,12 +1,8 @@
-import 'package:strophe/src/bosh.dart';
-import 'package:strophe/src/core/Strophe.Builder.dart';
-import 'package:strophe/src/core/Strophe.Connection.dart';
-import 'package:strophe/src/core/Strophe.Handler.dart';
-import 'package:strophe/src/core/Strophe.SASLMechanism.dart';
-import 'package:strophe/src/core/Strophe.TimedHandler.dart';
-import 'package:strophe/src/plugins/plugins.dart';
-import 'package:strophe/src/websocket.dart';
 import 'package:xml/xml.dart' as xml;
+
+import 'package:strophe/src/core/Strophe.Builder.dart';
+import 'package:strophe/src/core/Strophe.SASLMechanism.dart';
+import 'package:strophe/src/plugins/plugins.dart';
 
 /// Class: Strophe
 /// An object container for all Strophe library functions.

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:http/http.dart' as http;
+import 'package:strophe/src/bosh/Strophe.Request.dart';
 import 'package:strophe/src/core/ServiceType.dart';
 import 'package:strophe/src/core/Strophe.Builder.dart';
 import 'package:strophe/src/core/Strophe.Connection.dart';
@@ -10,6 +11,19 @@ import 'package:strophe/src/core/core.dart';
 import 'package:strophe/src/core/sessionstorage.dart';
 import 'package:xml/xml.dart' as xml;
 
+/// Class: Strophe.Bosh
+/// _Private_ helper class that handles BOSH Connections
+///
+/// The Strophe.Bosh class is used internally by Strophe.Connection
+/// to encapsulate BOSH sessions. It is not meant to be used from user's code.
+///
+/// File: bosh.js
+/// A JavaScript library to enable BOSH in Strophejs.
+///
+/// this library uses Bidirectional-streams Over Synchronous HTTP (BOSH)
+/// to emulate a persistent, stateful, two-way connection to an XMPP server.
+/// More information on BOSH can be found in XEP 124.
+///
 class StropheBosh extends ServiceType {
   StropheConnection _conn;
 
@@ -27,16 +41,25 @@ class StropheBosh extends ServiceType {
 
   int inactivity;
 
-  Map<String, String> lastResponseHeaders;
+  Map<String, String> lastResponseHeaders; // TODO: review this variable
 
   List<StropheRequest> _requests;
 
   bool disconnecting;
 
+  /// PrivateConstructor: Strophe.Bosh
+  /// Create and initialize a Strophe.Bosh object.
+  ///
+  /// Parameters:
+  ///   (Strophe.Connection) connection - The Strophe.Connection that will use BOSH.
+  ///
+  /// Returns:
+  ///   A new Strophe.Bosh object.
+  ///
   StropheBosh(StropheConnection connection) {
     this._conn = connection;
     /* request id for body tags */
-    this.rid = new Random().nextInt(4294967295);
+    this.rid = Random().nextInt(4294967295);
     /* The current session ID. */
     this.sid = null;
 
@@ -47,13 +70,11 @@ class StropheBosh extends ServiceType {
     this.errors = 0;
     this.inactivity = null;
 
-    this.lastResponseHeaders = null;
-
     this._requests = [];
   }
 
   @override
-  StropheConnection get conn => null;
+  StropheConnection get conn => null; // TODO: why is this reset?
 
   /// Variable: strip
   ///
@@ -74,7 +95,12 @@ class StropheBosh extends ServiceType {
   ///    A Strophe.Builder with a <body/> element.
   StropheBuilder _buildBody() {
     StropheBuilder bodyWrap = Strophe.$build(
-        'body', {'rid': this.rid++, 'xmlns': Strophe.NS['HTTPBIND']});
+      'body',
+      {
+        'rid': this.rid++,
+        'xmlns': Strophe.NS['HTTPBIND'],
+      },
+    );
     if (this.sid != null) {
       bodyWrap = bodyWrap.attrs({'sid': this.sid});
     }
@@ -85,17 +111,13 @@ class StropheBosh extends ServiceType {
     return bodyWrap;
   }
 
-  /** PrivateFunction: _reset
-   *  Reset the connection.
-   *
-   *  This function is called by the reset function of the Strophe Connection
-   */
-  reset() {
-    this._reset();
-  }
-
-  _reset() {
-    this.rid = new Random().nextInt(4294967295);
+  /// PrivateFunction: _reset
+  /// Reset the connection.
+  ///
+  /// This function is called by the reset function of the Strophe Connection
+  ///
+  void _reset() {
+    this.rid = Random().nextInt(4294967295);
     this.sid = null;
     this.errors = 0;
     if (this._conn.sessionCachingSupported()) {
@@ -105,16 +127,12 @@ class StropheBosh extends ServiceType {
     this._conn.nextValidRid(this.rid);
   }
 
-  /** PrivateFunction: _connect
-   *  _Private_ function that initializes the BOSH connection.
-   *
-   *  Creates and sends the Request that initializes the BOSH connection.
-   */
-  connect([int wait, int hold, String route]) {
-    _connect(wait, hold, route);
-  }
-
-  _connect([int wait, int hold, String route]) {
+  /// PrivateFunction: _connect
+  /// _Private_ function that initializes the BOSH connection.
+  ///
+  /// Creates and sends the Request that initializes the BOSH connection.
+  ///
+  void _connect([int wait, int hold, String route]) {
     this.wait = wait ?? this.wait;
     this.hold = hold ?? this.hold;
     this.errors = 0;
@@ -122,20 +140,24 @@ class StropheBosh extends ServiceType {
     // build the body tag
     var body = this._buildBody().attrs({
       'to': this._conn.domain,
-      "xml:lang": "en",
+      'xml:lang': 'en',
       'wait': this.wait.toString(),
       'hold': this.hold.toString(),
-      'content': "text/xml; charset=utf-8",
-      'ver': "1.6",
-      "xmpp:version": "1.0",
-      "xmlns:xmpp": Strophe.NS['BOSH']
+      'content': 'text/xml; charset=utf-8',
+      'ver': '1.6',
+      'xmpp:version': '1.0',
+      'xmlns:xmpp': Strophe.NS['BOSH']
     });
 
     if (route != null && route.isNotEmpty) {
-      body.attrs({route: route});
+      body.attrs({
+        route: route,
+      });
     }
     StropheRequest req =
-        new StropheRequest(body.tree(), null, body.tree().getAttribute("rid"));
+        StropheRequest(body.tree(), null, body.tree().getAttribute('rid'));
+    // We must set it after creating req so that we can pass it to
+    // _onRequestStateChange
     req.func = () => this._onRequestStateChange(this._conn.connectCb, req);
     req.origFunc = req.func;
 
@@ -901,124 +923,5 @@ class StropheBosh extends ServiceType {
             this.window) {
       this._processRequest(1);
     }
-  }
-}
-/** PrivateClass: Request
- *  _Private_ helper class that provides a cross implementation abstraction
- *  for a BOSH related XMLHttpRequest.
- *
- *  The Request class is used internally to encapsulate BOSH request
- *  information.  It is not meant to be used from user's code.
- */
-
-/** PrivateConstructor: Request
- *  Create and initialize a new Request object.
- *
- *  Parameters:
- *    (XMLElement) elem - The XML data to be sent in the request.
- *    (Function) func - The function that will be called when the
- *      XMLHttpRequest readyState changes.
- *    (Integer) rid - The BOSH rid attribute associated with this request.
- *    (Integer) sends - The number of times this same request has been sent.
- */
-class StropheRequest {
-  int id;
-
-  xml.XmlElement xmlData;
-
-  String data;
-
-  Function origFunc;
-
-  Function func;
-
-  num date;
-
-  String rid;
-
-  int sends;
-
-  bool abort;
-
-  int dead;
-
-  http.Client xhr;
-  http.Response response;
-
-  StropheRequest(xml.XmlElement elem, Function func, String rid, [int sends]) {
-    this.id = ++Strophe.requestId;
-    this.xmlData = elem;
-    this.data = Strophe.serialize(elem);
-    // save original function in case we need to make a new request
-    // from this one.
-    this.origFunc = func;
-    this.func = func;
-    this.rid = rid;
-    this.date = null;
-    this.sends = sends ?? 0;
-    this.abort = false;
-    this.dead = null;
-    this.age();
-    this.xhr = this._newXHR();
-  }
-
-  num timeDead() {
-    if (this.dead == null) {
-      return 0;
-    }
-    int now = new DateTime.now().millisecondsSinceEpoch;
-    return (now - this.dead) / 1000;
-  }
-
-  num age() {
-    if (this.date == null || this.date == 0) {
-      return 0;
-    }
-    int now = new DateTime.now().millisecondsSinceEpoch;
-    return (now - this.date) / 1000;
-  }
-
-  /** PrivateFunction: getResponse
-   *  Get a response from the underlying XMLHttpRequest.
-   *
-   *  This function attempts to get a response from the request and checks
-   *  for errors.
-   *
-   *  Throws:
-   *    "parsererror" - A parser error occured.
-   *    "badformat" - The entity has sent XML that cannot be processed.
-   *
-   *  Returns:
-   *    The DOM element tree of the response.
-   */
-  xml.XmlElement getResponse() {
-    String body = response.body;
-    xml.XmlElement node;
-    try {
-      node = xml.XmlDocument.parse(body).rootElement;
-      Strophe.error("responseXML: " + Strophe.serialize(node));
-      if (node == null) {
-        throw {'message': 'Parsing produced null node'};
-      }
-    } catch (e) {
-      // if (node.name == "parsererror") {
-      Strophe.error("invalid response received" + e.toString());
-      Strophe.error("responseText: " + body);
-      throw "parsererror";
-      //}
-    }
-    return node;
-  }
-
-  /** PrivateFunction: _newXHR
-   *  _Private_ helper function to create XMLHttpRequests.
-   *
-   *  This function creates XMLHttpRequests across all implementations.
-   *
-   *  Returns:
-   *    A new XMLHttpRequest.
-   */
-  http.Client _newXHR() {
-    return new http.Client();
   }
 }
