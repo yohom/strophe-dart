@@ -250,7 +250,7 @@ class StropheBosh extends ServiceType {
         session.sid != null &&
         session.sid.isNotEmpty &&
         session.jid != null &&
-        session.jid.isNotEmpty && // TODO: finish this IF
+        session.jid.isNotEmpty &&
         (jid == null ||
             Strophe.getBareJidFromJid(session.jid) ==
                 Strophe.getBareJidFromJid(jid) ||
@@ -269,47 +269,42 @@ class StropheBosh extends ServiceType {
     }
   }
 
-  /** PrivateFunction: _cacheSession
-   *  _Private_ handler for the beforeunload event.
-   *
-   *  This handler is used to process the Bosh-part of the initial request.
-   *  Parameters:
-   *    (Request) bodyWrap - The received stanza.
-   */
+  /// PrivateFunction: _cacheSession
+  ///  _Private_ handler for the beforeunload event.
+  ///
+  ///  This handler is used to process the Bosh-part of the initial request.
+  ///  Parameters:
+  ///    (Request) bodyWrap - The received stanza.
   void _cacheSession() {
     if (this._conn.authenticated) {
-      if (this._conn.jid != null &&
-          this._conn.jid.isNotEmpty &&
+      if (this._conn.jid?.isNotEmpty == true &&
           this.rid != null &&
           this.rid != 0 &&
-          this.sid != null &&
-          this.sid.isNotEmpty) {
+          this.sid?.isNotEmpty == true) {
         SessionStorage.setItem(
             'strophe-bosh-session',
-            JsonCodec().encode(
-                {'jid': this._conn.jid, 'rid': this.rid, 'sid': this.sid}));
+            JsonCodec().encode({
+              'jid': this._conn.jid,
+              'rid': this.rid,
+              'sid': this.sid,
+            }));
       }
     } else {
       SessionStorage.removeItem('strophe-bosh-session');
     }
   }
 
-  /** PrivateFunction: _connect_cb
-   *  _Private_ handler for initial connection request.
-   *
-   *  This handler is used to process the Bosh-part of the initial request.
-   *  Parameters:
-   *    (Request) bodyWrap - The received stanza.
-   */
-  connectCb(xml.XmlElement bodyWrap) {
-    this._connectCb(bodyWrap);
-  }
-
+  /// PrivateFunction: _connect_cb
+  ///  _Private_ handler for initial connection request.
+  ///
+  ///  This handler is used to process the Bosh-part of the initial request.
+  ///  Parameters:
+  ///    (Request) bodyWrap - The received stanza.
   _connectCb(xml.XmlElement bodyWrap) {
     String typ = bodyWrap.getAttribute("type");
     String cond;
     List<xml.XmlElement> conflict;
-    if (typ != null && typ == "terminate") {
+    if (typ == "terminate") {
       // an error occurred
       cond = bodyWrap.getAttribute("condition");
       Strophe.error("BOSH-Connection failed: " + cond);
@@ -332,49 +327,39 @@ class StropheBosh extends ServiceType {
       this.sid = bodyWrap.getAttribute("sid");
     }
     String wind = bodyWrap.getAttribute('requests');
-    if (wind != null) {
+    if (wind?.isNotEmpty == true) {
       this.window = int.parse(wind);
     }
     String hold = bodyWrap.getAttribute('hold');
-    if (hold != null) {
+    if (hold?.isNotEmpty == true) {
       this.hold = int.parse(hold);
     }
     String wait = bodyWrap.getAttribute('wait');
-    if (wait != null) {
+    if (wait?.isNotEmpty == true) {
       this.wait = int.parse(wait);
     }
     String inactivity = bodyWrap.getAttribute('inactivity');
-    if (inactivity != null) {
+    if (inactivity?.isNotEmpty == true) {
       this.inactivity = int.parse(inactivity);
     }
   }
 
-  /** PrivateFunction: _disconnect
-   *  _Private_ part of Connection.disconnect for Bosh
-   *
-   *  Parameters:
-   *    (Request) pres - This stanza will be sent before disconnecting.
-   */
-  disconnect(xml.XmlElement pres) {
-    this._disconnect(pres);
-  }
-
-  _disconnect(xml.XmlElement pres) {
+  /// PrivateFunction: _disconnect
+  ///  _Private_ part of Connection.disconnect for Bosh
+  ///
+  ///  Parameters:
+  ///    (Request) pres - This stanza will be sent before disconnecting.
+  void _disconnect(xml.XmlElement pres) {
     this._sendTerminate(pres);
   }
 
-  /** PrivateFunction: _doDisconnect
-   *  _Private_ function to disconnect.
-   *
-   *  Resets the SID and RID.
-   */
-  doDisconnect() {
-    this._doDisconnect();
-  }
-
-  _doDisconnect() {
+  /// PrivateFunction: _doDisconnect
+  ///  _Private_ function to disconnect.
+  ///
+  ///  Resets the SID and RID.
+  void _doDisconnect() {
     this.sid = null;
-    this.rid = new Random().nextInt(4294967295);
+    this.rid = Random().nextInt(4294967295);
     if (this._conn.sessionCachingSupported()) {
       SessionStorage.removeItem('strophe-bosh-session');
     }
@@ -382,26 +367,20 @@ class StropheBosh extends ServiceType {
     this._conn.nextValidRid(this.rid);
   }
 
-  /** PrivateFunction: _emptyQueue
-   * _Private_ function to check if the Request queue is empty.
-   *
-   *  Returns:
-   *    True, if there are no Requests queued, False otherwise.
-   */
-  bool emptyQueue() {
-    return this._emptyQueue();
-  }
-
+  /// PrivateFunction: _emptyQueue
+  /// _Private_ function to check if the Request queue is empty.
+  ///
+  ///  Returns:
+  ///    True, if there are no Requests queued, False otherwise.
   bool _emptyQueue() {
     return this._requests.length == 0;
   }
 
-  /** PrivateFunction: _callProtocolErrorHandlers
-   *  _Private_ function to call error handlers registered for HTTP errors.
-   *
-   *  Parameters:
-   *    (Request) req - The request that is changing readyState.
-   */
+  /// PrivateFunction: _callProtocolErrorHandlers
+  ///  _Private_ function to call error handlers registered for HTTP errors.
+  ///
+  ///  Parameters:
+  ///    (Request) req - The request that is changing readyState.
   _callProtocolErrorHandlers(StropheRequest req) {
     int reqStatus = this._getRequestStatus(req);
     Function errorCallback =
@@ -409,21 +388,20 @@ class StropheBosh extends ServiceType {
     errorCallback?.call(this, reqStatus);
   }
 
-  /** PrivateFunction: _hitError
-   *  _Private_ function to handle the error count.
-   *
-   *  Requests are resent automatically until their error count reaches
-   *  5.  Each time an error is encountered, this function is called to
-   *  increment the count and disconnect if the count is too high.
-   *
-   *  Parameters:
-   *    (Integer) reqStatus - The request status.
-   */
+  /// PrivateFunction: _hitError
+  ///  _Private_ function to handle the error count.
+  ///
+  ///  Requests are resent automatically until their error count reaches
+  ///  5.  Each time an error is encountered, this function is called to
+  ///  increment the count and disconnect if the count is too high.
+  ///
+  ///  Parameters:
+  ///    (Integer) reqStatus - The request status.
   void _hitError(int reqStatus) {
     this.errors++;
-    Strophe.warn("request errored, status: " +
+    Strophe.warn('request errored, status: ' +
         reqStatus.toString() +
-        ", number of errors: " +
+        ', number of errors: ' +
         this.errors.toString());
     if (this.errors > 4) {
       this._conn.onDisconnectTimeout();
