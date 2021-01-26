@@ -54,61 +54,62 @@ class StropheConnection {
   /// @private
   // todo: List<DeferredSendIQ> _deferredIQs = [];
 
-  RegisterPlugin get register {
-    return Strophe.connectionPlugins['register'];
-  }
+  // TODO: review this plugins getters
+  // RegisterPlugin get register {
+  //   return Strophe.connectionPlugins['register'];
+  // }
 
-  DiscoPlugin get disco {
-    return Strophe.connectionPlugins['disco'];
-  }
+  // DiscoPlugin get disco {
+  //   return Strophe.connectionPlugins['disco'];
+  // }
 
-  RosterPlugin get roster {
-    return Strophe.connectionPlugins['roster'];
-  }
+  // RosterPlugin get roster {
+  //   return Strophe.connectionPlugins['roster'];
+  // }
 
-  AdministrationPlugin get admin {
-    return Strophe.connectionPlugins['admin'];
-  }
+  // AdministrationPlugin get admin {
+  //   return Strophe.connectionPlugins['admin'];
+  // }
 
-  CapsPlugin get caps {
-    return Strophe.connectionPlugins['caps'];
-  }
+  // CapsPlugin get caps {
+  //   return Strophe.connectionPlugins['caps'];
+  // }
 
-  MucPlugin get muc {
-    return Strophe.connectionPlugins['muc'];
-  }
+  // MucPlugin get muc {
+  //   return Strophe.connectionPlugins['muc'];
+  // }
 
-  BookMarkPlugin get bookmarks {
-    return Strophe.connectionPlugins['bookmarks'];
-  }
+  // BookMarkPlugin get bookmarks {
+  //   return Strophe.connectionPlugins['bookmarks'];
+  // }
 
-  LastActivity get lastactivity {
-    return Strophe.connectionPlugins['lastactivity'];
-  }
+  // LastActivity get lastactivity {
+  //   return Strophe.connectionPlugins['lastactivity'];
+  // }
 
-  PepPlugin get pep {
-    return Strophe.connectionPlugins['pep'];
-  }
+  // PepPlugin get pep {
+  //   return Strophe.connectionPlugins['pep'];
+  // }
 
-  PrivacyPlugin get privacy {
-    return Strophe.connectionPlugins['privacy'];
-  }
+  // PrivacyPlugin get privacy {
+  //   return Strophe.connectionPlugins['privacy'];
+  // }
 
-  PubsubPlugin get pubsub {
-    return Strophe.connectionPlugins['pubsub'];
-  }
+  // PubsubPlugin get pubsub {
+  //   return Strophe.connectionPlugins['pubsub'];
+  // }
 
-  PrivateStorage get private {
-    return Strophe.connectionPlugins['private'];
-  }
+  // PrivateStorage get private {
+  //   return Strophe.connectionPlugins['private'];
+  // }
 
-  VCardTemp get vcard {
-    return Strophe.connectionPlugins['vcard'];
-  }
+  // VCardTemp get vcard {
+  //   return Strophe.connectionPlugins['vcard'];
+  // }
 
-  ChatStatesNotificationPlugin get chatstates {
-    return Strophe.connectionPlugins['chatstates'];
-  }
+  // ChatStatesNotificationPlugin get chatstates {
+  //   return Strophe.connectionPlugins['chatstates'];
+  // }
 
   List<StropheTimedHandler> timedHandlers;
 
