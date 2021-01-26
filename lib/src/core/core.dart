@@ -803,7 +803,7 @@ class Strophe {
   /// PrivateVariable: _requestId
   ///  _Private_ variable that keeps track of the request ids for
   ///  connections.
-  static int _requestId = 0;
+  static int requestId = 0;
 
   static Map<String, PluginClass> get connectionPlugins =>
       _connectionPlugins; // TODO: should this be done this way?

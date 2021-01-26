@@ -4,13 +4,13 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:strophe/src/bosh.dart';
+import 'package:strophe/src/core/ServiceType.dart';
 import 'package:strophe/src/core/Strophe.Builder.dart';
 import 'package:strophe/src/core/Strophe.Handler.dart';
 import 'package:strophe/src/core/Strophe.SASLMechanism.dart';
 import 'package:strophe/src/core/Strophe.TimedHandler.dart';
 import 'package:strophe/src/core/core.dart';
 import 'package:strophe/src/core/sessionstorage.dart';
-import 'package:strophe/src/enums.dart';
 import 'package:strophe/src/plugins/plugins.dart';
 import 'package:strophe/src/utils.dart';
 import 'package:xml/xml.dart' as xml;
@@ -165,7 +165,6 @@ class StropheConnection {
       (xml.XmlElement elem) => {};
 
   RawInputCallback _rawInputCallback = (String elem) => {};
-  RawInputCallback _connexionErrorInputCallback = (String error) => {};
 
   RawInputCallback _rawOutputCallback = (String elem) => {};
 
@@ -1332,7 +1331,7 @@ class StropheConnection {
   ///     Useful for plugins with their own xmpp connect callback (when they
   ///     want to do something special).
   ///
-  void _connectCb(req, [Function _callback, String raw]) {
+  void connectCb(req, [Function _callback, String raw]) {
     Strophe.info("_connect_cb was called");
     this.connected = true;
 

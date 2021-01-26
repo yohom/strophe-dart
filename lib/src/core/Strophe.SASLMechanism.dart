@@ -307,6 +307,7 @@ class StropheSASLMD5 extends StropheSASLMechanism {
     String realm = "";
     String host;
     String nonce = "";
+    // ignore: unused_local_variable
     String qop = "";
     Match matches;
     while (attribMatch.hasMatch(challenge)) {

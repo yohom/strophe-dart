@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:strophe/src/core/ServiceType.dart';
 import 'package:strophe/src/core/Strophe.Builder.dart';
 import 'package:strophe/src/core/Strophe.Connection.dart';
 import 'package:strophe/src/core/core.dart';
-import 'package:strophe/src/enums.dart';
 import 'package:xml/xml.dart' as xml;
 
 class StropheWebSocket extends ServiceType {
@@ -162,7 +162,8 @@ class StropheWebSocket extends ServiceType {
             onError: this._onError, onDone: this._onClose);
         this._onOpen();
       }).catchError((e) {
-        this._conn.connexionError("impossible de joindre le serveur XMPP : $e");
+        // todo: handle error
+        // this._conn.connexionError("impossible de joindre le serveur XMPP : $e");
       });
     }
   }

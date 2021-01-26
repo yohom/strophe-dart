@@ -3,11 +3,11 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:http/http.dart' as http;
+import 'package:strophe/src/core/ServiceType.dart';
 import 'package:strophe/src/core/Strophe.Builder.dart';
 import 'package:strophe/src/core/Strophe.Connection.dart';
 import 'package:strophe/src/core/core.dart';
 import 'package:strophe/src/core/sessionstorage.dart';
-import 'package:strophe/src/enums.dart';
 import 'package:xml/xml.dart' as xml;
 
 class StropheBosh extends ServiceType {
@@ -55,25 +55,23 @@ class StropheBosh extends ServiceType {
   @override
   StropheConnection get conn => null;
 
-  /** Variable: strip
-   *
-   *  BOSH-Connections will have all stanzas wrapped in a <body> tag when
-   *  passed to <Strophe.Connection.xmlInput> or <Strophe.Connection.xmlOutput>.
-   *  To strip this tag, User code can set <Strophe.Bosh.strip> to "body":
-   *
-   *  > Strophe.Bosh.prototype.strip = "body";
-   *
-   *  This will enable stripping of the body tag in both
-   *  <Strophe.Connection.xmlInput> and <Strophe.Connection.xmlOutput>.
-   */
+  /// Variable: strip
+  ///
+  ///  BOSH-Connections will have all stanzas wrapped in a <body> tag when
+  ///  passed to <Strophe.Connection.xmlInput> or <Strophe.Connection.xmlOutput>.
+  ///  To strip this tag, User code can set <Strophe.Bosh.strip> to "body":
+  ///
+  ///  > Strophe.Bosh.prototype.strip = "body";
+  ///
+  ///  This will enable stripping of the body tag in both
+  ///  <Strophe.Connection.xmlInput> and <Strophe.Connection.xmlOutput>.
   String strip;
 
-  /** PrivateFunction: _buildBody
-   *  _Private_ helper function to generate the <body/> wrapper for BOSH.
-   *
-   *  Returns:
-   *    A Strophe.Builder with a <body/> element.
-   */
+  /// PrivateFunction: _buildBody
+  ///  _Private_ helper function to generate the <body/> wrapper for BOSH.
+  ///
+  ///  Returns:
+  ///    A Strophe.Builder with a <body/> element.
   StropheBuilder _buildBody() {
     StropheBuilder bodyWrap = Strophe.$build(
         'body', {'rid': this.rid++, 'xmlns': Strophe.NS['HTTPBIND']});
@@ -145,30 +143,29 @@ class StropheBosh extends ServiceType {
     this._throttledRequestHandler();
   }
 
-  /** PrivateFunction: _attach
-   *  Attach to an already created and authenticated BOSH session.
-   *
-   *  This function is provided to allow Strophe to attach to BOSH
-   *  sessions which have been created externally, perhaps by a Web
-   *  application.  This is often used to support auto-login type features
-   *  without putting user credentials into the page.
-   *
-   *  Parameters:
-   *    (String) jid - The full JID that is bound by the session.
-   *    (String) sid - The SID of the BOSH session.
-   *    (String) rid - The current RID of the BOSH session.  This RID
-   *      will be used by the next request.
-   *    (Function) callback The connect callback function.
-   *    (Integer) wait - The optional HTTPBIND wait value.  This is the
-   *      time the server will wait before returning an empty result for
-   *      a request.  The default setting of 60 seconds is recommended.
-   *      Other settings will require tweaks to the Strophe.TIMEOUT value.
-   *    (Integer) hold - The optional HTTPBIND hold value.  This is the
-   *      number of connections the server will hold at one time.  This
-   *      should almost always be set to 1 (the default).
-   *    (Integer) wind - The optional HTTBIND window value.  This is the
-   *      allowed range of request ids that are valid.  The default is 5.
-   */
+  /// PrivateFunction: _attach
+  ///  Attach to an already created and authenticated BOSH session.
+  ///
+  ///  This function is provided to allow Strophe to attach to BOSH
+  ///  sessions which have been created externally, perhaps by a Web
+  ///  application.  This is often used to support auto-login type features
+  ///  without putting user credentials into the page.
+  ///
+  ///  Parameters:
+  ///    (String) jid - The full JID that is bound by the session.
+  ///    (String) sid - The SID of the BOSH session.
+  ///    (String) rid - The current RID of the BOSH session.  This RID
+  ///      will be used by the next request.
+  ///    (Function) callback The connect callback function.
+  ///    (Integer) wait - The optional HTTPBIND wait value.  This is the
+  ///      time the server will wait before returning an empty result for
+  ///      a request.  The default setting of 60 seconds is recommended.
+  ///      Other settings will require tweaks to the Strophe.TIMEOUT value.
+  ///    (Integer) hold - The optional HTTPBIND hold value.  This is the
+  ///      number of connections the server will hold at one time.  This
+  ///      should almost always be set to 1 (the default).
+  ///    (Integer) wind - The optional HTTBIND window value.  This is the
+  ///      allowed range of request ids that are valid.  The default is 5.
   void attach(String jid, String sid, int rid, Function callback, int wait,
       int hold, int wind) {
     this._attach(jid, sid, rid, callback, wait, hold, wind);
