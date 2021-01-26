@@ -6,6 +6,7 @@ import 'dart:math';
 import 'package:strophe/src/bosh.dart';
 import 'package:strophe/src/core/Strophe.Builder.dart';
 import 'package:strophe/src/core/Strophe.Handler.dart';
+import 'package:strophe/src/core/Strophe.SASLMechanism.dart';
 import 'package:strophe/src/core/Strophe.TimedHandler.dart';
 import 'package:strophe/src/core/core.dart';
 import 'package:strophe/src/core/sessionstorage.dart';
@@ -31,7 +32,7 @@ class StropheConnection {
 
   xml.XmlElement features;
 
-  Map<String, dynamic> _saslData;
+  Map<String, dynamic> saslData;
 
   bool doSession = false;
 
@@ -200,7 +201,7 @@ class StropheConnection {
     this.features = null;
 
     // SASL
-    this._saslData = {};
+    this.saslData = {};
     this.doSession = false;
     this.doBind = false;
 
@@ -1464,7 +1465,7 @@ class StropheConnection {
       this._saslSuccessHandler =
           this._addSysHandler(this._saslSuccessCb, null, "success", null, null);
       this._saslFailureHandler =
-          this._addSysHandler(this._saslFailureCb, null, "failure", null, null);
+          this._addSysHandler(this.saslFailureCb, null, "failure", null, null);
       this._saslChallengeHandler = this
           ._addSysHandler(this._saslChallengeCb, null, "challenge", null, null);
 
@@ -1600,7 +1601,7 @@ class StropheConnection {
   ///   false to remove the handler.
   ///
   bool _saslSuccessCb(elem) {
-    String saslData = this._saslData["server-signature"];
+    String saslData = this.saslData["server-signature"];
     if (saslData != null && saslData.isNotEmpty) {
       String serverSignature;
       String success =
@@ -1619,8 +1620,8 @@ class StropheConnection {
           this._saslChallengeHandler = null;
         }
 
-        this._saslData = {};
-        return this._saslFailureCb(null);
+        this.saslData = {};
+        return this.saslFailureCb(null);
       }
     }
     Strophe.info("SASL authentication succeeded.");
@@ -1786,7 +1787,7 @@ class StropheConnection {
   /// Returns:
   ///   false to remove the handler.
   ///
-  _saslFailureCb([xml.XmlElement elem]) {
+  saslFailureCb([xml.XmlElement elem]) {
     // delete unneeded handlers
     if (this._saslSuccessHandler != null) {
       this.deleteHandler(this._saslSuccessHandler);

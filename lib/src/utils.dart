@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:strophe/src/enums.dart';
+import 'package:strophe/src/core/Strophe.SASLMechanism.dart';
 import 'package:xml/xml.dart';
 
 // Copyright (c) 2015, the Dart project authors.  Please see the AUTHORS file
