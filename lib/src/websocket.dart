@@ -369,6 +369,22 @@ class StropheWebSocket extends ServiceType {
     }
   }
 
+  ///  PrivateFunction: _no_auth_received
+  ///
+  /// Called on stream start/restart when no stream:features
+  /// has been received.
+  ///
+  @override
+  void noAuthReceived([Function _callback]) {
+    Strophe.error('Server did not send any auth methods');
+    this._conn.changeConnectStatus(
+        Strophe.Status['CONNFAIL'], 'Server did not send any auth methods');
+    if (_callback != null) {
+      _callback();
+    }
+    this._conn.doDisconnect();
+  }
+
   /// PrivateFunction: _onDisconnectTimeout
   /// _Private_ timeout handler for handling non-graceful disconnection.
   ///

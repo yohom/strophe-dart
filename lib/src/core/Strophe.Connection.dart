@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:strophe/src/bosh/Strophe.Request.dart';
 import 'package:strophe/src/bosh/bosh.dart';
 import 'package:strophe/src/core/ServiceType.dart';
 import 'package:strophe/src/core/Strophe.Builder.dart';
@@ -1524,7 +1525,7 @@ class StropheConnection {
           bodyWrap.findAllElements("features").length > 0;
     }
     if (!hasFeatures) {
-      this._noAuthReceived(_callback);
+      this.proto.noAuthReceived(_callback);
       return;
     }
 
@@ -1544,8 +1545,7 @@ class StropheConnection {
       if (bodyWrap.findAllElements("auth").length == 0) {
         // There are no matching SASL mechanisms and also no legacy
         // auth available.
-        this._noAuthReceived(
-            _callback); // TODO: in orig JS this is called on _proto, Check after bosh.dart review
+        this.proto.noAuthReceived(_callback);
         return;
       }
     }
@@ -2099,7 +2099,7 @@ class StropheConnection {
     }
   }
 
-// TODO: review if needed
+// TODO: review if needed, used in websocket.dart
   // set connexionError(RawInputCallback callback) {
   //   this._connexionErrorInputCallback = callback;
   // }
@@ -2115,19 +2115,20 @@ class StropheConnection {
   ///
   /// Sends a blank poll request.
   /// TODO: put this in to the bosh.dart file
-  Function get noAuthReceived {
-    return _noAuthReceived;
-  }
+  // Function get noAuthReceived {
+  //   return _noAuthReceived;
+  // }
 
-  _noAuthReceived([Function _callback]) {
-    String errorMsg =
-        "Server did not offer a supported authentication mechanism";
-    Strophe.error(errorMsg);
-    this._changeConnectStatus(
-        Strophe.Status['CONNFAIL'], Strophe.ErrorCondition['NO_AUTH_MECH']);
-    if (_callback != null) {
-      _callback();
-    }
-    this._doDisconnect();
-  }
+  // TODO: review this funcs, may not be needed because now put into the ServiceType
+  // _noAuthReceived([Function _callback]) {
+  //   String errorMsg =
+  //       "Server did not offer a supported authentication mechanism";
+  //   Strophe.error(errorMsg);
+  //   this._changeConnectStatus(
+  //       Strophe.Status['CONNFAIL'], Strophe.ErrorCondition['NO_AUTH_MECH']);
+  //   if (_callback != null) {
+  //     _callback();
+  //   }
+  //   this._doDisconnect();
+  // }
 }
