@@ -28,14 +28,6 @@ import 'package:strophe/src/utils.dart';
 import 'package:xml/xml.dart' as xml;
 import 'package:xml/xml.dart';
 
-const Map<String, String> ERRORSCONDITIONS = const {
-  'BAD_FORMAT': "bad-format",
-  'CONFLICT': "conflict",
-  'MISSING_JID_NODE': "x-strophe-bad-non-anon-jid",
-  'NO_AUTH_MECH': "no-auth-mech",
-  'UNKNOWN_REASON': "unknown",
-};
-
 /** Class: Strophe.SASLMechanism
  *
  *  encapsulates SASL authentication mechanisms.

@@ -1076,4 +1076,14 @@ class Strophe {
   static StropheSASLOAuthBearer SASLOAuthBearer = StropheSASLOAuthBearer();
   static StropheSASLExternal SASLExternal = StropheSASLExternal();
   static StropheSASLXOAuth2 SASLXOAuth2 = StropheSASLXOAuth2();
+
+  // Helper, doesn't exists in the JS code
+  // todo: enum
+  static const Map<String, String> ErrorCondition = const {
+    'BAD_FORMAT': "bad-format",
+    'CONFLICT': "conflict",
+    'MISSING_JID_NODE': "x-strophe-bad-non-anon-jid",
+    'NO_AUTH_MECH': "no-auth-mech",
+    'UNKNOWN_REASON': "unknown",
+  };
 }

@@ -4,16 +4,15 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:strophe/src/Strophe.Builder.dart';
-import 'package:strophe/src/enums.dart';
-import 'package:strophe/src/plugins/plugins.dart';
-import 'package:strophe/src/sessionstorage.dart';
-import 'package:xml/xml.dart' as xml;
-
 import 'package:strophe/src/Strophe.Handler.dart';
 import 'package:strophe/src/Strophe.TimedHandler.dart';
 import 'package:strophe/src/bosh.dart';
 import 'package:strophe/src/core.dart';
+import 'package:strophe/src/enums.dart';
+import 'package:strophe/src/plugins/plugins.dart';
+import 'package:strophe/src/sessionstorage.dart';
 import 'package:strophe/src/utils.dart';
+import 'package:xml/xml.dart' as xml;
 import 'package:xml/xml.dart';
 
 class StropheConnection {
@@ -1772,15 +1771,14 @@ class StropheConnection {
     return false;
   }
 
-  /** PrivateFunction: _saslBindCb
-   *  _Private_ handler for binding result and session start.
-   *
-   *  Parameters:
-   *    (XMLElement) elem - The matching stanza.
-   *
-   *  Returns:
-   *    false to remove the handler.
-   */
+  /// PrivateFunction: _saslBindCb
+  ///  _Private_ handler for binding result and session start.
+  ///
+  ///  Parameters:
+  ///    (XMLElement) elem - The matching stanza.
+  ///
+  ///  Returns:
+  ///    false to remove the handler.
   bool _saslBindCb(xml.XmlElement elem) {
     if (elem.getAttribute("type") == "error") {
       Strophe.info("SASL binding failed.");
