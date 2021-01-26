@@ -1075,7 +1075,7 @@ class Strophe {
   static StropheSASLSHA1 SASLSHA1 = StropheSASLSHA1();
   static StropheSASLOAuthBearer SASLOAuthBearer = StropheSASLOAuthBearer();
   static StropheSASLExternal SASLExternal = StropheSASLExternal();
-  static StropheSASLXOAuth2 SASLXOAuth2 = StropheSASLXOAuth2();
+  // static StropheSASLXOAuth2 SASLXOAuth2 = StropheSASLXOAuth2(); // TODO: this is only on latest master of Strophe JS
 
   // Helper, doesn't exists in the JS code
   // todo: enum

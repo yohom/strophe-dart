@@ -37,10 +37,6 @@ class StropheConnection {
 
   bool doBind = false;
 
-  Function _startConnection;
-
-  Function _attachConnection;
-
   ///
   /// @typedef DeferredSendIQ Object
   /// @property {Element} iq - The IQ to send.
@@ -181,10 +177,6 @@ class StropheConnection {
     return this._requests;
   }
 
-  Function _reset;
-  ConnexionCallback _connectCb;
-  AuthenticateCallback _authenticate;
-
   StropheConnection(String service, [Map options]) {
     // The service URL
     this.service = service;
@@ -252,131 +244,10 @@ class StropheConnection {
     this.cookies = Utils.addCookies(this.options['cookies']);
     this.registerSASLMechanisms(this.options['mechanisms']);
 
-    this.initializeFunction();
-    this._startConnection = this._connect; // TODO: what is this?
-    this._attachConnection = this._attach; // TODO: what is this?
-
     // initialize plugins
     Strophe.connectionPlugins.forEach((String key, PluginClass value) {
       Strophe.connectionPlugins[key].init(this);
     });
-  }
-
-  initializeFunction() {
-    // TODO: check if this is needed to be done this way? maybe the _reset func
-    // can leave as normal func
-
-    this._reset = () {
-      this._proto.reset();
-
-      // SASL
-      this.doSession = false;
-      this.doBind = false;
-
-      // handler lists
-      this.timedHandlers = [];
-      this.handlers = [];
-      this.removeTimeds = [];
-      this.removeHandlers = [];
-      this.addTimeds = [];
-      this.addHandlers = [];
-
-      this.authenticated = false;
-      this.connected = false;
-      this.disconnecting = false;
-      this.restored = false;
-
-      this._data = [];
-      this._requests = [];
-      this._uniqueId = 0;
-    };
-
-    this._connectCb = (req, [Function _callback, String raw]) {
-      Strophe.info("_connect_cb was called");
-      this.connected = true;
-
-      xml.XmlElement bodyWrap;
-      try {
-        bodyWrap = this._proto.reqToData(req);
-      } catch (e) {
-        if (e.toString() != "badformat") {
-          throw e;
-        }
-        this._changeConnectStatus(
-            Strophe.Status['CONNFAIL'], Strophe.ErrorCondition['BAD_FORMAT']);
-        this._doDisconnect(Strophe.ErrorCondition['BAD_FORMAT']);
-      }
-      if (bodyWrap == null) {
-        return;
-      }
-
-      //if (this.xmlInput != Strophe.Connection.xmlInput) { // TODO: this here is also commented out
-      if (bodyWrap.name.qualified == this._proto.strip &&
-          bodyWrap.children.length > 0) {
-        this.xmlInput(bodyWrap.firstChild);
-      } else {
-        this.xmlInput(bodyWrap);
-      }
-      //}
-      //if (this.rawInput != Strophe.Connection.rawInput) {
-      if (raw != null) {
-        this.rawInput(raw);
-      } else {
-        this.rawInput(Strophe.serialize(bodyWrap));
-      }
-      //}
-
-      int conncheck = this._proto.connectCb(bodyWrap);
-      if (conncheck == Strophe.Status['CONNFAIL']) {
-        return;
-      }
-
-      // Check for the stream:features tag
-      bool hasFeatures;
-      if (bodyWrap.getAttribute('xmlns') == Strophe.NS['STREAM']) {
-        hasFeatures = bodyWrap.findAllElements("features").length > 0 ??
-            bodyWrap.findAllElements("stream:features").length > 0;
-      } else {
-        hasFeatures = bodyWrap.findAllElements("stream:features").length > 0 ??
-            bodyWrap.findAllElements("features").length > 0;
-      }
-      if (!hasFeatures) {
-        this._noAuthReceived(_callback);
-        return;
-      }
-
-      List<StropheSASLMechanism> matched = [];
-      String mech;
-      List<xml.XmlElement> mechanisms =
-          bodyWrap.findAllElements("mechanism").toList();
-      if (mechanisms.length > 0) {
-        for (int i = 0; i < mechanisms.length; i++) {
-          mech = Strophe.getText(mechanisms.elementAt(i));
-          if (this.mechanisms[mech] != null) {
-            matched.add(this.mechanisms[mech]);
-          }
-        }
-      }
-      if (matched.length == 0) {
-        if (bodyWrap.findAllElements("auth").length == 0) {
-          // There are no matching SASL mechanisms and also no legacy
-          // auth available.
-          this._noAuthReceived(
-              _callback); // TODO: in orig JS this is called on _proto
-          return;
-        }
-      }
-      if (this.doAuthentication != false) {
-        this.authenticate(matched);
-      }
-    };
-    this._authenticate = (List<StropheSASLMechanism> matched) {
-      this._attemptSASLAuth(matched).then((bool result) {
-        if (result != true) {
-          this._attemptLegacyAuth();
-        }
-      });
-    };
   }
 
   addConnectionPlugin(String name, PluginClass ptype) {
@@ -414,15 +285,29 @@ class StropheConnection {
   /// This function should be called after a connection is disconnected
   /// before this connection is reused.
   ///
-  set reset(Function callback) {
-    this._reset = callback;
-  }
+  void reset() {
+    this._proto.reset();
 
-  Function get reset {
-    if (_reset == null) {
-      initializeFunction();
-    }
-    return this._reset;
+    // SASL
+    this.doSession = false;
+    this.doBind = false;
+
+    // handler lists
+    this.timedHandlers = [];
+    this.handlers = [];
+    this.removeTimeds = [];
+    this.removeHandlers = [];
+    this.addTimeds = [];
+    this.addHandlers = [];
+
+    this.authenticated = false;
+    this.connected = false;
+    this.disconnecting = false;
+    this.restored = false;
+
+    this._data = [];
+    this._requests = [];
+    this._uniqueId = 0;
   }
 
   /// Function: pause
@@ -549,16 +434,7 @@ class StropheConnection {
   /// certificate), set authcid to this same JID. See XEP-178 for more
   /// details.
   ///
-  Function get connect {
-    return this._startConnection ?? _connect;
-  }
-
-  set connect(Function value) {
-    // TODO: figure out why there is a setter and a getter for this func
-    this._startConnection = value;
-  }
-
-  _connect(String jid, String pass, ConnectCallBack callback,
+  void connect(String jid, String pass, ConnectCallBack callback,
       [int wait, int hold, String route, String authcid]) {
     this.jid = jid;
 
@@ -619,15 +495,7 @@ class StropheConnection {
   /// should almost always be set to 1 (the default).
   /// (Integer) wind - The optional HTTBIND window value.  This is the
   /// allowed range of request ids this are valid.  The default is 5.
-  Function get attach {
-    return this._attachConnection ?? _attach;
-  }
-
-  set attach(Function value) {
-    this._attachConnection = value;
-  }
-
-  _attach(String jid, String sid, int rid, Function callback, int wait,
+  void attach(String jid, String sid, int rid, Function callback, int wait,
       int hold, int wind) {
     if (this._proto is StropheBosh) {
       this._proto.attach(jid, sid, rid, callback, wait, hold, wind);
@@ -1176,9 +1044,9 @@ class StropheConnection {
         [
           Strophe.SASLAnonymous,
           Strophe.SASLExternal,
-          Strophe.SASLMD5, // TODO: not on master branch of Strophe JS
+          Strophe.SASLMD5, // this is on version 1.2.14 of Strophe JS
           Strophe.SASLOAuthBearer,
-          Strophe.SASLXOAuth2, // TODO: this is only on master of Strophe JS
+          // Strophe.SASLXOAuth2, // TODO: this is only on latest master of Strophe JS
           Strophe.SASLPlain,
           Strophe.SASLSHA1
         ];
@@ -1463,15 +1331,84 @@ class StropheConnection {
   ///     Useful for plugins with their own xmpp connect callback (when they
   ///     want to do something special).
   ///
-  set connectCb(ConnexionCallback param) {
-    this._connectCb = param;
-  }
+  void _connectCb(req, [Function _callback, String raw]) {
+    Strophe.info("_connect_cb was called");
+    this.connected = true;
 
-  ConnexionCallback get connectCb {
-    if (_reset == null) {
-      initializeFunction();
+    xml.XmlElement bodyWrap;
+    try {
+      bodyWrap = this._proto.reqToData(req);
+    } catch (e) {
+      if (e.toString() != "badformat") {
+        throw e;
+      }
+      this._changeConnectStatus(
+          Strophe.Status['CONNFAIL'], Strophe.ErrorCondition['BAD_FORMAT']);
+      this._doDisconnect(Strophe.ErrorCondition['BAD_FORMAT']);
     }
-    return this._connectCb;
+    if (bodyWrap == null) {
+      return;
+    }
+
+    //if (this.xmlInput != Strophe.Connection.xmlInput) { // TODO: this here is also commented out
+    if (bodyWrap.name.qualified == this._proto.strip &&
+        bodyWrap.children.length > 0) {
+      this.xmlInput(bodyWrap.firstChild);
+    } else {
+      this.xmlInput(bodyWrap);
+    }
+    //}
+    //if (this.rawInput != Strophe.Connection.rawInput) {
+    if (raw != null) {
+      this.rawInput(raw);
+    } else {
+      this.rawInput(Strophe.serialize(bodyWrap));
+    }
+    //}
+
+    int conncheck = this._proto.connectCb(bodyWrap);
+    if (conncheck == Strophe.Status['CONNFAIL']) {
+      return;
+    }
+
+    // Check for the stream:features tag
+    bool hasFeatures;
+    if (bodyWrap.getAttribute('xmlns') == Strophe.NS['STREAM']) {
+      hasFeatures = bodyWrap.findAllElements("features").length > 0 ??
+          bodyWrap.findAllElements("stream:features").length > 0;
+    } else {
+      hasFeatures = bodyWrap.findAllElements("stream:features").length > 0 ??
+          bodyWrap.findAllElements("features").length > 0;
+    }
+    if (!hasFeatures) {
+      this._noAuthReceived(_callback);
+      return;
+    }
+
+    List<StropheSASLMechanism> matched = [];
+    String mech;
+    List<xml.XmlElement> mechanisms =
+        bodyWrap.findAllElements("mechanism").toList();
+    if (mechanisms.length > 0) {
+      for (int i = 0; i < mechanisms.length; i++) {
+        mech = Strophe.getText(mechanisms.elementAt(i));
+        if (this.mechanisms[mech] != null) {
+          matched.add(this.mechanisms[mech]);
+        }
+      }
+    }
+    if (matched.length == 0) {
+      if (bodyWrap.findAllElements("auth").length == 0) {
+        // There are no matching SASL mechanisms and also no legacy
+        // auth available.
+        this._noAuthReceived(
+            _callback); // TODO: in orig JS this is called on _proto, Check after bosh.dart review
+        return;
+      }
+    }
+    if (this.doAuthentication != false) {
+      this.authenticate(matched);
+    }
   }
 
   /// Function: sortMechanismsByPriority
@@ -1589,15 +1526,12 @@ class StropheConnection {
   /// Parameters:
   ///   (Array) matched - Array of SASL mechanisms supported.
   ///
-  set authenticate(AuthenticateCallback callback) {
-    this._authenticate = callback;
-  }
-
-  AuthenticateCallback get authenticate {
-    if (_authenticate == null) {
-      initializeFunction();
-    }
-    return this._authenticate;
+  void authenticate(List<StropheSASLMechanism> matched) {
+    this._attemptSASLAuth(matched).then((bool result) {
+      if (result != true) {
+        this._attemptLegacyAuth();
+      }
+    });
   }
 
   /// PrivateFunction: _saslChallengeCb
