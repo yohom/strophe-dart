@@ -116,7 +116,8 @@ class StropheBosh extends ServiceType {
   ///
   /// This function is called by the reset function of the Strophe Connection
   ///
-  void _reset() {
+  @override
+  void reset() {
     this.rid = Random().nextInt(4294967295);
     this.sid = null;
     this.errors = 0;
@@ -132,7 +133,8 @@ class StropheBosh extends ServiceType {
   ///
   /// Creates and sends the Request that initializes the BOSH connection.
   ///
-  void _connect([int wait, int hold, String route]) {
+  @override
+  void connect([int wait, int hold, String route]) {
     this.wait = wait ?? this.wait;
     this.hold = hold ?? this.hold;
     this.errors = 0;
@@ -408,27 +410,41 @@ class StropheBosh extends ServiceType {
     }
   }
 
-  /** PrivateFunction: _onDisconnectTimeout
-   *  _Private_ timeout handler for handling non-graceful disconnection.
-   *
-   *  Cancels all remaining Requests and clears the queue.
-   */
-  onDisconnectTimeout() {
-    this._onDisconnectTimeout();
+  ///  PrivateFunction: _no_auth_received
+  ///
+  /// Called on stream start/restart when no stream:features
+  /// has been received and sends a blank poll request.
+  ///
+  @override
+  void noAuthReceived([Function _callback]) {
+    // TODO: check if this if statement implementation is correct
+    if (_callback != null) {
+      _callback = _callback();
+    } else {
+      _callback = this._conn.connectCb;
+    }
+    var body = this._buildBody();
+    StropheRequest req =
+        StropheRequest(body.tree(), null, body.tree().getAttribute('rid'));
+    req.func = () => this._onRequestStateChange(_callback, req);
+    req.origFunc = req.func;
+    this._requests.add(req);
+    this._throttledRequestHandler();
   }
 
-  _onDisconnectTimeout() {
+  /// PrivateFunction: _onDisconnectTimeout
+  /// _Private_ timeout handler for handling non-graceful disconnection.
+  ///
+  /// Cancels all remaining Requests and clears the queue.
+  ///
+  void _onDisconnectTimeout() {
     this._abortAllRequests();
   }
 
-  /** PrivateFunction: _abortAllRequests
-   *  _Private_ helper function that makes sure all pending requests are aborted.
-   */
-  abortAllRequests() {
-    this._abortAllRequests();
-  }
-
-  _abortAllRequests() {
+  /// PrivateFunction: _abortAllRequests
+  /// _Private_ helper function that makes sure all pending requests are aborted.
+  ///
+  void _abortAllRequests() {
     StropheRequest req;
     while (this._requests.length > 0) {
       req = this._requests.removeLast();
@@ -437,16 +453,12 @@ class StropheBosh extends ServiceType {
     }
   }
 
-  /** PrivateFunction: _onIdle
-   *  _Private_ handler called by Strophe.Connection._onIdle
-   *
-   *  Sends all queued Requests or polls with empty Request if there are none.
-   */
-  onIdle() {
-    this._onIdle();
-  }
-
-  _onIdle() {
+  /// PrivateFunction: _onIdle
+  /// _Private_ handler called by Strophe.Connection._onIdle
+  ///
+  /// Sends all queued Requests or polls with empty Request if there are none.
+  ///
+  void _onIdle() {
     var data = this._conn.data;
     // if no requests are in progress, poll
     if (this._conn.authenticated &&
@@ -468,9 +480,9 @@ class StropheBosh extends ServiceType {
           if (data[i] == "restart") {
             body.attrs({
               'to': this._conn.domain,
-              "xml:lang": "en",
-              "xmpp:restart": "true",
-              "xmlns:xmpp": Strophe.NS['BOSH']
+              'xml:lang': 'en',
+              'xmpp:restart': 'true',
+              'xmlns:xmpp': Strophe.NS['BOSH']
             });
           } else {
             body.cnode(data[i]).up();
@@ -479,7 +491,7 @@ class StropheBosh extends ServiceType {
       }
       this._conn.data = [];
       StropheRequest req = new StropheRequest(
-          body.tree(), null, body.tree().getAttribute("rid"));
+          body.tree(), null, body.tree().getAttribute('rid'));
       req.func = () => this._onRequestStateChange(this._conn.dataRecv, req);
       req.origFunc = req.func;
       this._requests.add(req);
@@ -496,33 +508,33 @@ class StropheBosh extends ServiceType {
       }
 
       if (timeElapsed > (Strophe.TIMEOUT * this.wait).floor()) {
-        Strophe.warn("Request " +
+        Strophe.warn('Request ' +
             this._requests[0].id.toString() +
-            " timed out, over " +
+            ' timed out, over ' +
             (Strophe.TIMEOUT * this.wait).floor().toString() +
-            " seconds since last activity");
+            ' seconds since last activity');
         this._throttledRequestHandler();
       }
     }
   }
 
-  /** PrivateFunction: _getRequestStatus
-   *
-   *  Returns the HTTP status code from a Request
-   *
-   *  Parameters:
-   *    (Request) req - The Request instance.
-   *    (Integer) def - The default value that should be returned if no
-   *          status value was found.
-   */
+  /// PrivateFunction: _getRequestStatus
+  ///
+  /// Returns the HTTP status code from a Request
+  ///
+  /// Parameters:
+  ///   (Request) req - The Request instance.
+  ///   (Integer) def - The default value that should be returned if no
+  ///         status value was found.
+  ///
   int _getRequestStatus(StropheRequest req, [num def]) {
     int reqStatus;
     if (req.response != null) {
       try {
         reqStatus = req.response.statusCode;
       } catch (e) {
-        Strophe.error("Caught an error while retrieving a request's status, " +
-            "reqStatus: " +
+        Strophe.error('Caught an error while retrieving a request\'s status, ' +
+            'reqStatus: ' +
             reqStatus.toString());
       }
     }
@@ -532,25 +544,25 @@ class StropheBosh extends ServiceType {
     return reqStatus;
   }
 
-  /** PrivateFunction: _onRequestStateChange
-   *  _Private_ handler for Request state changes.
-   *
-   *  This function is called when the XMLHttpRequest readyState changes.
-   *  It contains a lot of error handling logic for the many ways that
-   *  requests can fail, and calls the request callback when requests
-   *  succeed.
-   *
-   *  Parameters:
-   *    (Function) func - The handler for the request.
-   *    (Request) req - The request that is changing readyState.
-   */
-  _onRequestStateChange(Function func, StropheRequest req) {
-    Strophe.debug("request id " +
+  /// PrivateFunction: _onRequestStateChange
+  /// _Private_ handler for Request state changes.
+  ///
+  /// This function is called when the XMLHttpRequest readyState changes.
+  /// It contains a lot of error handling logic for the many ways that
+  /// requests can fail, and calls the request callback when requests
+  /// succeed.
+  ///
+  /// Parameters:
+  ///   (Function) func - The handler for the request.
+  ///   (Request) req - The request that is changing readyState.
+  ///
+  void _onRequestStateChange(Function func, StropheRequest req) {
+    Strophe.debug('request id ' +
         req.id.toString() +
-        "." +
+        '.' +
         req.sends.toString() +
-        " state changed to " +
-        (req.response != null ? req.response.statusCode.toString() : "0"));
+        ' state changed to ' +
+        (req.response != null ? req.response.statusCode.toString() : '0'));
     if (req.abort) {
       req.abort = false;
       return;
@@ -564,7 +576,7 @@ class StropheBosh extends ServiceType {
     int reqStatus = this._getRequestStatus(req);
     this.lastResponseHeaders = req.response?.headers;
     this.disconnecting =
-        false; // TDOO: this is hardcode fix and disconnecting should actually be used
+        false; // TODO: this is hardcode fix and disconnecting should actually be used, see bosh.js line 633
     if (this.disconnecting && reqStatus >= 400) {
       this._hitError(reqStatus);
       this._callProtocolErrorHandlers(req);
@@ -577,7 +589,7 @@ class StropheBosh extends ServiceType {
       // remove from internal queue
       this._removeRequest(req);
       Strophe.debug(
-          "request id " + req.id.toString() + " should now be removed");
+          'request id ' + req.id.toString() + ' should now be removed');
     }
 
     if (reqStatus == 200) {
@@ -596,24 +608,24 @@ class StropheBosh extends ServiceType {
         this._restartRequest(0);
       }
       this._conn.nextValidRid(int.parse(req.rid) + 1);
-      Strophe.debug("request id " +
+      Strophe.debug('request id ' +
           req.id.toString() +
-          "." +
+          '.' +
           req.sends.toString() +
-          " got 200");
+          ' got 200');
       func?.call(req); // call handler
       this.errors = 0;
     } else if (reqStatus == 0 ||
         (reqStatus >= 400 && reqStatus < 600) ||
         reqStatus >= 12000) {
       // request failed
-      Strophe.error("request id " +
+      Strophe.error('request id ' +
           req.id.toString() +
-          "." +
+          '.' +
           req.sends.toString() +
-          " error " +
+          ' error ' +
           reqStatus.toString() +
-          " happened");
+          ' happened');
       this._hitError(reqStatus);
       this._callProtocolErrorHandlers(req);
       if (reqStatus >= 400 && reqStatus < 500) {
@@ -621,32 +633,32 @@ class StropheBosh extends ServiceType {
         this._conn.doDisconnect();
       }
     } else {
-      Strophe.error("request id " +
+      Strophe.error('request id ' +
           req.id.toString() +
-          "." +
+          '.' +
           req.sends.toString() +
-          " error " +
+          ' error ' +
           reqStatus.toString() +
-          " happened");
+          ' happened');
     }
 
     if (!valid_request && !too_many_retries) {
       this._throttledRequestHandler();
     } else if (too_many_retries && !this._conn.connected) {
-      this._conn.changeConnectStatus(Strophe.Status['CONNFAIL'], "giving-up");
+      this._conn.changeConnectStatus(Strophe.Status['CONNFAIL'], 'giving-up');
     }
   }
 
-  /** PrivateFunction: _processRequest
-   *  _Private_ function to process a request in the queue.
-   *
-   *  This function takes requests off the queue and sends them and
-   *  restarts dead requests.
-   *
-   *  Parameters:
-   *    (Integer) i - The index of the request in the queue.
-   */
-  _processRequest(int i) {
+  /// PrivateFunction: _processRequest
+  /// _Private_ function to process a request in the queue.
+  ///
+  /// This function takes requests off the queue and sends them and
+  /// restarts dead requests.
+  ///
+  /// Parameters:
+  ///   (Integer) i - The index of the request in the queue.
+  ///
+  void _processRequest(int i) {
     StropheRequest req = this._requests[i];
     int reqStatus = this._getRequestStatus(req, -1);
 
@@ -665,26 +677,25 @@ class StropheBosh extends ServiceType {
         (req.response != null && (reqStatus < 1 || reqStatus >= 500));
     if (primaryTimeout || secondaryTimeout || requestCompletedWithServerError) {
       if (secondaryTimeout) {
-        Strophe.error("Request " +
+        Strophe.error('Request ' +
             this._requests[i].id.toString() +
-            " timed out (secondary), restarting");
+            ' timed out (secondary), restarting');
       }
       req.abort = true;
       req.xhr.close();
       this._requests[i] =
-          new StropheRequest(req.xmlData, req.origFunc, req.rid, req.sends);
+          StropheRequest(req.xmlData, req.origFunc, req.rid, req.sends);
       req = this._requests[i];
     }
 
     if (req.response == null) {
-      Strophe.debug("request id " +
+      Strophe.debug('request id ' +
           req.id.toString() +
-          "." +
+          '.' +
           req.sends.toString() +
-          " posting");
+          ' posting');
 
-      // Fires the XHR request -- may be invoked immediately
-      // or on a gradually expanding retry window for reconnects
+// TODO: bash.js line 733 review send command
 
       // Implement progressive backoff for reconnects --
       // First retry (send == 1) should also be instantaneous
@@ -704,8 +715,9 @@ class StropheBosh extends ServiceType {
 
       req.sends++;
 
-      //if (this._conn.xmlOutput != Strophe.Connection.xmlOutput) {
-      if (req.xmlData.name == this.strip && req.xmlData.children.length > 0) {
+      //if (this._conn.xmlOutput != Strophe.Connection.xmlOutput) { // TODO: this code also is commented out in other places
+      if (req.xmlData.name.toString() == this.strip &&
+          req.xmlData.children.length > 0) {
         this._conn.xmlOutput(req.xmlData.firstChild);
       } else {
         this._conn.xmlOutput(req.xmlData);
@@ -715,31 +727,33 @@ class StropheBosh extends ServiceType {
       this._conn.rawOutput(req.data);
       //}
     } else {
-      Strophe.debug("_processRequest: " +
-          (i == 0 ? "first" : "second") +
-          " request has readyState of " +
-          (req.response != null ? req.response.reasonPhrase : "0"));
+      Strophe.debug('_processRequest: ' +
+          (i == 0 ? 'first' : 'second') +
+          ' request has readyState of ' +
+          (req.response != null ? req.response.reasonPhrase : '0'));
     }
   }
 
+  /// Fires the XHR request -- may be invoked immediately
+  /// or on a gradually expanding retry window for reconnects
   _sendFunc(StropheRequest req) {
     String contentType;
     http.Request request;
     try {
       contentType =
-          this._conn.options['contentType'] ?? "text/xml; charset=utf-8";
-      request = new http.Request("POST", Uri.parse(this._conn.service));
+          this._conn.options['contentType'] ?? 'text/xml; charset=utf-8';
+      request = new http.Request('POST', Uri.parse(this._conn.service));
       request.persistentConnection = this._conn.options['sync'] ? false : true;
       request.headers['Content-Type'] = contentType;
       if (this._conn.options['withCredentials']) {
         request.headers['withCredentials'] = 'true';
       }
     } catch (e2) {
-      Strophe.error("XHR open failed: " + e2.toString());
+      Strophe.error('XHR open failed: ' + e2.toString());
       if (!this._conn.connected) {
         this
             ._conn
-            .changeConnectStatus(Strophe.Status['CONNFAIL'], "bad-service");
+            .changeConnectStatus(Strophe.Status['CONNFAIL'], 'bad-service');
       }
       this._conn.disconnect();
       return;
@@ -765,14 +779,14 @@ class StropheBosh extends ServiceType {
     });
   }
 
-  /** PrivateFunction: _removeRequest
-   *  _Private_ function to remove a request from the queue.
-   *
-   *  Parameters:
-   *    (Request) req - The request to remove.
-   */
+  /// PrivateFunction: _removeRequest
+  /// _Private_ function to remove a request from the queue.
+  ///
+  /// Parameters:
+  ///   (Request) req - The request to remove.
+  ///
   void _removeRequest(StropheRequest req) {
-    Strophe.debug("removing request");
+    Strophe.debug('removing request');
     for (int i = this._requests.length - 1; i >= 0; i--) {
       if (req == this._requests[i]) {
         this._requests.removeAt(i);
@@ -781,35 +795,36 @@ class StropheBosh extends ServiceType {
     this._throttledRequestHandler();
   }
 
-  /** PrivateFunction: _restartRequest
-   *  _Private_ function to restart a request that is presumed dead.
-   *
-   *  Parameters:
-   *    (Integer) i - The index of the request in the queue.
-   */
-  _restartRequest(i) {
+  /// PrivateFunction: _restartRequest
+  /// _Private_ function to restart a request that is presumed dead.
+  ///
+  /// Parameters:
+  ///   (Integer) i - The index of the request in the queue.
+  ///
+  void _restartRequest(i) {
     var req = this._requests[i];
     if (req.dead == null) {
-      req.dead = new DateTime.now().millisecondsSinceEpoch;
+      req.dead = DateTime.now().millisecondsSinceEpoch;
     }
 
     this._processRequest(i);
   }
 
-  /** PrivateFunction: _reqToData
-   * _Private_ function to get a stanza out of a request.
-   *
-   * Tries to extract a stanza out of a Request Object.
-   * When this fails the current connection will be disconnected.
-   *
-   *  Parameters:
-   *    (Object) req - The Request.
-   *
-   *  Returns:
-   *    The stanza that was passed.
-   */
+  ///  PrivateFunction: _reqToData
+  /// _Private_ function to get a stanza out of a request.
+  ///
+  /// Tries to extract a stanza out of a Request Object.
+  /// When this fails the current connection will be disconnected.
+  ///
+  ///  Parameters:
+  ///    (Object) req - The Request.
+  ///
+  ///  Returns:
+  ///    The stanza that was passed.
+  ///
   @override
   xml.XmlElement reqToData(dynamic req) {
+    // TODO: does this need to be public?
     req = req as StropheRequest;
     return this._reqToData(req);
   }
@@ -818,85 +833,82 @@ class StropheBosh extends ServiceType {
     try {
       return req.getResponse();
     } catch (e) {
-      if (e != "parsererror") {
+      if (e != 'parsererror') {
         throw e;
       }
-      this._conn.disconnect("strophe-parsererror");
+      this._conn.disconnect('strophe-parsererror');
       return null;
     }
   }
 
-  /** PrivateFunction: _sendTerminate
-   *  _Private_ function to send initial disconnect sequence.
-   *
-   *  This is the first step in a graceful disconnect.  It sends
-   *  the BOSH server a terminate body and includes an unavailable
-   *  presence if authentication has completed.
-   */
-  _sendTerminate(pres) {
-    Strophe.info("_sendTerminate was called");
-    StropheBuilder body = this._buildBody().attrs({'type': "terminate"});
-    if (pres) {
+  /// PrivateFunction: _sendTerminate
+  /// _Private_ function to send initial disconnect sequence.
+  ///
+  /// This is the first step in a graceful disconnect.  It sends
+  /// the BOSH server a terminate body and includes an unavailable
+  /// presence if authentication has completed.
+  /// TODO: is the pres type is some kind of XmlNode?
+  void _sendTerminate(pres) {
+    Strophe.info('_sendTerminate was called');
+    StropheBuilder body = this._buildBody().attrs({'type': 'terminate'});
+    if (pres != null) {
       body.cnode(pres.tree());
     }
     StropheRequest req =
-        new StropheRequest(body.tree(), null, body.tree().getAttribute("rid"));
-    req.func = this._onRequestStateChange(this._conn.dataRecv, req);
+        new StropheRequest(body.tree(), null, body.tree().getAttribute('rid'));
+    req.func = () => this._onRequestStateChange(this._conn.dataRecv, req);
     req.origFunc = req.func;
     this._requests.add(req);
     this._throttledRequestHandler();
   }
 
-  /** PrivateFunction: _send
-   *  _Private_ part of the Connection.send function for BOSH
-   *
-   * Just triggers the RequestHandler to send the messages that are in the queue
-   */
-  send() {
-    this._send();
-  }
-
-  _send() {
-    if (this._conn.idleTimeout != null) this._conn.idleTimeout.cancel();
+  /// PrivateFunction: _send
+  /// _Private_ part of the Connection.send function for BOSH
+  ///
+  /// Just triggers the RequestHandler to send the messages that are in the queue
+  ///
+  void _send() {
+    if (this._conn.idleTimeout != null) {
+      this._conn.idleTimeout.cancel();
+    }
     this._throttledRequestHandler();
 
     // XXX: setTimeout should be called only with function expressions (23974bc1)
-    this._conn.idleTimeout = new Timer(new Duration(milliseconds: 100), () {
+    this._conn.idleTimeout = Timer(Duration(milliseconds: 100), () {
       this._onIdle();
     });
   }
 
-  /** PrivateFunction: _sendRestart
-   *
-   *  Send an xmpp:restart stanza.
-   */
-  sendRestart() {
-    this._sendRestart();
-  }
-
-  _sendRestart() {
+  /// PrivateFunction: _sendRestart
+  ///
+  /// Send an xmpp:restart stanza.
+  ///
+  void _sendRestart() {
     this._throttledRequestHandler();
-    if (this._conn.idleTimeout != null) this._conn.idleTimeout.cancel();
+    if (this._conn.idleTimeout != null) {
+      this._conn.idleTimeout.cancel();
+    }
   }
 
-  /** PrivateFunction: _throttledRequestHandler
-   *  _Private_ function to throttle requests to the connection window.
-   *
-   *  This function makes sure we don't send requests so fast that the
-   *  request ids overflow the connection window in the case that one
-   *  request died.
-   */
-  _throttledRequestHandler() {
+  /// PrivateFunction: _throttledRequestHandler
+  /// _Private_ function to throttle requests to the connection window.
+  ///
+  /// This function makes sure we don't send requests so fast that the
+  /// request ids overflow the connection window in the case that one
+  /// request died.
+  ///
+  void _throttledRequestHandler() {
     if (this._requests == null) {
       Strophe.debug(
-          "_throttledRequestHandler called with " + "undefined requests");
+          '_throttledRequestHandler called with ' + 'undefined requests');
     } else {
-      Strophe.debug("_throttledRequestHandler called with " +
+      Strophe.debug('_throttledRequestHandler called with ' +
           this._requests.length.toString() +
-          " requests");
+          ' requests');
     }
 
     if (this._requests == null || this._requests.length == 0) {
+      //TODO: should there be an empty check on _requests?
       return;
     }
 

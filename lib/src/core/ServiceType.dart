@@ -55,4 +55,6 @@ abstract class ServiceType {
   void onDisconnectTimeout() {}
 
   void onIdle() {}
+
+  void noAuthReceived([Function _callback]);
 }
