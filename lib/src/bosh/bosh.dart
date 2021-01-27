@@ -41,7 +41,7 @@ class StropheBosh extends ServiceType {
 
   int inactivity;
 
-  Map<String, String> lastResponseHeaders; // TODO: review this variable
+  Map<String, String> lastResponseHeaders;
 
   List<StropheRequest> _requests;
 
@@ -573,9 +573,7 @@ class StropheBosh extends ServiceType {
     }
     int reqStatus = this._getRequestStatus(req);
     this.lastResponseHeaders = req.response?.headers;
-    this.disconnecting =
-        false; // TODO: this is hardcode fix and disconnecting should actually be used, see bosh.js line 633
-    if (this.disconnecting && reqStatus >= 400) {
+    if (this.disconnecting == true && reqStatus >= 400) {
       this._hitError(reqStatus);
       this._callProtocolErrorHandlers(req);
       return;
@@ -770,7 +768,7 @@ class StropheBosh extends ServiceType {
         print('The raw response: $response');
         print('The raw status code: ${response.statusCode}');
         req.response = await http.Response.fromStream(response);
-        req.func?.call();
+        req.func?.call(); // TODO: review this if this should be done this way
       },
     ).catchError((e) {
       print('The raw error: $e');
@@ -822,7 +820,6 @@ class StropheBosh extends ServiceType {
   ///
   @override
   xml.XmlElement reqToData(dynamic req) {
-    // TODO: does this need to be public?
     req = req as StropheRequest;
     return this._reqToData(req);
   }
@@ -906,7 +903,6 @@ class StropheBosh extends ServiceType {
     }
 
     if (this._requests == null || this._requests.length == 0) {
-      //TODO: should there be an empty check on _requests?
       return;
     }
 
