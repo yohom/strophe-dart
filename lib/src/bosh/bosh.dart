@@ -418,9 +418,7 @@ class StropheBosh extends ServiceType {
   @override
   void noAuthReceived([Function _callback]) {
     // TODO: check if this if statement implementation is correct
-    if (_callback != null) {
-      _callback = _callback();
-    } else {
+    if (_callback == null) {
       _callback = this._conn.connectCb;
     }
     var body = this._buildBody();

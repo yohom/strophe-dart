@@ -190,11 +190,6 @@ class StropheConnection {
   /// @property {number} timeout - The ID of the timeout task that needs to be cleared, before sending the IQ.
   ///
 
-  /// Deferred IQs to be sent upon reconnect.
-  /// @type {Array<DeferredSendIQ>}
-  /// @private
-  // todo: List<DeferredSendIQ> _deferredIQs = [];
-
   // TODO: review this plugins getters
   // RegisterPlugin get register {
   //   return Strophe.connectionPlugins['register'];
@@ -1475,15 +1470,15 @@ class StropheConnection {
   ///     Useful for plugins with their own xmpp connect callback (when they
   ///     want to do something special).
   ///
-  void connectCb(req, [Function _callback, String raw]) {
-    Strophe.info("_connect_cb was called");
+  void connectCb(StropheRequest req, [Function _callback, String raw]) {
+    Strophe.info('_connect_cb was called');
     this.connected = true;
 
     xml.XmlElement bodyWrap;
     try {
       bodyWrap = this._proto.reqToData(req);
     } catch (e) {
-      if (e.toString() != "badformat") {
+      if (e.toString() != 'badformat') {
         throw e;
       }
       this._changeConnectStatus(
@@ -1518,11 +1513,11 @@ class StropheConnection {
     // Check for the stream:features tag
     bool hasFeatures;
     if (bodyWrap.getAttribute('xmlns') == Strophe.NS['STREAM']) {
-      hasFeatures = bodyWrap.findAllElements("features").length > 0 ??
-          bodyWrap.findAllElements("stream:features").length > 0;
+      hasFeatures = bodyWrap.findAllElements('features').length > 0 ??
+          bodyWrap.findAllElements('stream:features').length > 0;
     } else {
-      hasFeatures = bodyWrap.findAllElements("stream:features").length > 0 ??
-          bodyWrap.findAllElements("features").length > 0;
+      hasFeatures = bodyWrap.findAllElements('stream:features').length > 0 ??
+          bodyWrap.findAllElements('features').length > 0;
     }
     if (!hasFeatures) {
       this.proto.noAuthReceived(_callback);
@@ -1532,7 +1527,7 @@ class StropheConnection {
     List<StropheSASLMechanism> matched = [];
     String mech;
     List<xml.XmlElement> mechanisms =
-        bodyWrap.findAllElements("mechanism").toList();
+        bodyWrap.findAllElements('mechanism').toList();
     if (mechanisms.length > 0) {
       for (int i = 0; i < mechanisms.length; i++) {
         mech = Strophe.getText(mechanisms.elementAt(i));
@@ -1542,7 +1537,7 @@ class StropheConnection {
       }
     }
     if (matched.length == 0) {
-      if (bodyWrap.findAllElements("auth").length == 0) {
+      if (bodyWrap.findAllElements('auth').length == 0) {
         // There are no matching SASL mechanisms and also no legacy
         // auth available.
         this.proto.noAuthReceived(_callback);
@@ -1869,7 +1864,7 @@ class StropheConnection {
       return false;
     }
 
-    // TODO - need to grab errors
+    // TODO - need to grab errors // from Strophe.js
     List<xml.XmlElement> bind = elem.findAllElements("bind").toList();
     List<xml.XmlElement> jidNode;
     if (bind.length > 0) {
@@ -2106,29 +2101,5 @@ class StropheConnection {
 
   // RawInputCallback get connexionError {
   //   return this._connexionErrorInputCallback;
-  // }
-
-  ///  PrivateFunction: _no_auth_received
-  ///
-  /// Called on stream start/restart when no stream:features
-  /// has been received or when no viable authentication mechanism is offered.
-  ///
-  /// Sends a blank poll request.
-  /// TODO: put this in to the bosh.dart file
-  // Function get noAuthReceived {
-  //   return _noAuthReceived;
-  // }
-
-  // TODO: review this funcs, may not be needed because now put into the ServiceType
-  // _noAuthReceived([Function _callback]) {
-  //   String errorMsg =
-  //       "Server did not offer a supported authentication mechanism";
-  //   Strophe.error(errorMsg);
-  //   this._changeConnectStatus(
-  //       Strophe.Status['CONNFAIL'], Strophe.ErrorCondition['NO_AUTH_MECH']);
-  //   if (_callback != null) {
-  //     _callback();
-  //   }
-  //   this._doDisconnect();
   // }
 }
