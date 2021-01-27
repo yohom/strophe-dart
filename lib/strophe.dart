@@ -20,3 +20,4 @@ export 'src/plugins/pubsub.dart';
 export 'src/plugins/register.dart';
 export 'src/plugins/roster.dart';
 export 'src/plugins/vcard-temp.dart';
+export 'src/utils.dart';
