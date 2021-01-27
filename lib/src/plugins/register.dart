@@ -215,7 +215,7 @@ class RegisterPlugin extends PluginClass {
     List<XmlElement> mechanisms =
         bodyWrap.findAllElements("mechanism").toList();
     if (register.length == 0 && mechanisms.length == 0) {
-      conn.noAuthReceived(_callback);
+      conn.proto.noAuthReceived(_callback);
       return false;
     }
 

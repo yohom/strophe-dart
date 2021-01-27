@@ -367,7 +367,18 @@ class StropheConnection {
   /// This function should be called after a connection is disconnected
   /// before this connection is reused.
   ///
-  void reset() {
+  set reset(void Function() callback) {
+    _resetFunction = callback;
+  }
+
+  void Function() get reset {
+    _resetFunction ??= _reset;
+    return _resetFunction;
+  }
+
+  void Function() _resetFunction;
+
+  void _reset() {
     this._proto.reset();
 
     // SASL
@@ -516,7 +527,23 @@ class StropheConnection {
   /// certificate), set authcid to this same JID. See XEP-178 for more
   /// details.
   ///
-  void connect(String jid, String pass, ConnectCallBack callback,
+  set connect(
+      void Function(String jid, String pass, ConnectCallBack callback,
+              [int wait, int hold, String route, String authcid])
+          callback) {
+    _connectFunction = callback;
+  }
+
+  void Function(String jid, String pass, ConnectCallBack callback,
+      [int wait, int hold, String route, String authcid]) get connect {
+    _connectFunction ??= _connect;
+    return _connectFunction;
+  }
+
+  void Function(String jid, String pass, ConnectCallBack callback,
+      [int wait, int hold, String route, String authcid]) _connectFunction;
+
+  void _connect(String jid, String pass, ConnectCallBack callback,
       [int wait, int hold, String route, String authcid]) {
     this.jid = jid;
 
@@ -577,7 +604,24 @@ class StropheConnection {
   /// should almost always be set to 1 (the default).
   /// (Integer) wind - The optional HTTBIND window value.  This is the
   /// allowed range of request ids this are valid.  The default is 5.
-  void attach(String jid, String sid, int rid, Function callback, int wait,
+
+  set attach(
+      void Function(String jid, String sid, int rid, Function callback,
+              int wait, int hold, int wind)
+          callback) {
+    _attachFunction = callback;
+  }
+
+  void Function(String jid, String sid, int rid, Function callback, int wait,
+      int hold, int wind) get attach {
+    _attachFunction ??= _attach;
+    return _attachFunction;
+  }
+
+  void Function(String jid, String sid, int rid, Function callback, int wait,
+      int hold, int wind) _attachFunction;
+
+  void _attach(String jid, String sid, int rid, Function callback, int wait,
       int hold, int wind) {
     if (this._proto is StropheBosh) {
       this._proto.attach(jid, sid, rid, callback, wait, hold, wind);
@@ -1126,7 +1170,8 @@ class StropheConnection {
         [
           Strophe.SASLAnonymous,
           Strophe.SASLExternal,
-          Strophe.SASLMD5, // this is on version 1.2.14 of Strophe JS
+          Strophe.SASLMD5,
+          // this is on version 1.2.14 of Strophe JS
           Strophe.SASLOAuthBearer,
           // Strophe.SASLXOAuth2, // TODO: this is only on latest master of Strophe JS
           Strophe.SASLPlain,
@@ -1413,7 +1458,21 @@ class StropheConnection {
   ///     Useful for plugins with their own xmpp connect callback (when they
   ///     want to do something special).
   /// TODO: fix req type after aligning websocket.dart
-  void connectCb(dynamic req, [Function _callback, String raw]) {
+
+  set connectCb(
+      void Function(dynamic req, [Function _callback, String raw]) callback) {
+    _connectCbFunction = callback;
+  }
+
+  void Function(dynamic req, [Function _callback, String raw]) get connectCb {
+    _connectCbFunction ??= _connectCb;
+    return _connectCbFunction;
+  }
+
+  void Function(dynamic req, [Function _callback, String raw])
+      _connectCbFunction;
+
+  void _connectCb(dynamic req, [Function _callback, String raw]) {
     Strophe.info('_connect_cb was called');
     this.connected = true;
 
@@ -1607,7 +1666,19 @@ class StropheConnection {
   /// Parameters:
   ///   (Array) matched - Array of SASL mechanisms supported.
   ///
-  void authenticate(List<StropheSASLMechanism> matched) {
+
+  set authenticate(void Function(List<StropheSASLMechanism> matched) callback) {
+    _authenticateFunction = callback;
+  }
+
+  void Function(List<StropheSASLMechanism> matched) get authenticate {
+    _authenticateFunction ??= _authenticate;
+    return _authenticateFunction;
+  }
+
+  void Function(List<StropheSASLMechanism> matched) _authenticateFunction;
+
+  void _authenticate(List<StropheSASLMechanism> matched) {
     this._attemptSASLAuth(matched).then((bool result) {
       if (result != true) {
         this._attemptLegacyAuth();
@@ -2038,11 +2109,11 @@ class StropheConnection {
   }
 
 // TODO: review if needed, used in websocket.dart
-  // set connexionError(RawInputCallback callback) {
-  //   this._connexionErrorInputCallback = callback;
-  // }
+// set connexionError(RawInputCallback callback) {
+//   this._connexionErrorInputCallback = callback;
+// }
 
-  // RawInputCallback get connexionError {
-  //   return this._connexionErrorInputCallback;
-  // }
+// RawInputCallback get connexionError {
+//   return this._connexionErrorInputCallback;
+// }
 }

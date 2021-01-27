@@ -253,13 +253,17 @@ class StropheBuilder {
     return this;
   }
 
-  // xml.XmlElement get currentNode {
-  //   xml.XmlNode _currentNode = this.nodeTree.children[0];
-  //   for (int i = 1; i < this.node.length; i++) {
-  //     _currentNode = _currentNode.children[this.node[i]];
-  //   }
-  //   return _currentNode is xml.XmlDocument
-  //       ? _currentNode.rootElement
-  //       : _currentNode as xml.XmlElement;
-  // }
+  ///
+  /// Extra methods (not included in Strophe js)
+  ///
+
+  xml.XmlElement get currentNode {
+    xml.XmlNode _currentNode = this.nodeTree.children[0];
+    for (int i = 1; i < this.node.length; i++) {
+      _currentNode = _currentNode.children[this.node[i]];
+    }
+    return _currentNode is xml.XmlDocument
+        ? _currentNode.rootElement
+        : _currentNode as xml.XmlElement;
+  }
 }
