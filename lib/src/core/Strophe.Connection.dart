@@ -1469,8 +1469,8 @@ class StropheConnection {
   ///   (Function) _callback - low level (xmpp) connect callback function.
   ///     Useful for plugins with their own xmpp connect callback (when they
   ///     want to do something special).
-  ///
-  void connectCb(StropheRequest req, [Function _callback, String raw]) {
+  /// TODO: fix req type after aligning websocket.dart
+  void connectCb(dynamic req, [Function _callback, String raw]) {
     Strophe.info('_connect_cb was called');
     this.connected = true;
 
