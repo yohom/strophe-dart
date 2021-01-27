@@ -2,8 +2,15 @@ import 'package:strophe/src/core/Strophe.Builder.dart';
 import 'package:strophe/src/core/Strophe.Connection.dart';
 import 'package:strophe/src/core/Strophe.Handler.dart';
 import 'package:strophe/src/core/core.dart';
+import 'package:strophe/src/plugins/disco.dart';
 import 'package:strophe/src/plugins/plugins.dart';
 import 'package:xml/xml.dart';
+
+extension StrophePubsubPlugin on StropheConnection {
+  PubsubPlugin get pubsub {
+    return Strophe.connectionPlugins['pubsub'];
+  }
+}
 
 /// File: strophe.pubsub.js
 /// A Strophe plugin for XMPP Publish-Subscribe.
@@ -12,7 +19,6 @@ import 'package:xml/xml.dart';
 /// partially implementing XEP 0060.
 ///
 /// Strophe.Builder.prototype methods should probably move to strophe.js
-
 class PubsubBuilder extends StropheBuilder {
   PubsubBuilder(String name, [Map<String, dynamic> attrs]) : super(name, attrs);
 

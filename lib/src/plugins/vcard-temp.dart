@@ -2,11 +2,16 @@ import 'package:strophe/src/core/Strophe.Builder.dart';
 import 'package:strophe/src/core/Strophe.Connection.dart';
 import 'package:strophe/src/core/core.dart';
 import 'package:strophe/src/plugins/plugins.dart';
-import 'package:xml/xml.dart' as xml;
 import 'package:xml/xml.dart';
 
-class VCardTemp extends PluginClass {
-  StropheBuilder _buildIq(String type, String jid, [xml.XmlElement vCardEl]) {
+extension StropheVCardTempPlugin on StropheConnection {
+  VCardTempPlugin get vcard {
+    return Strophe.connectionPlugins['vcard'];
+  }
+}
+
+class VCardTempPlugin extends PluginClass {
+  StropheBuilder _buildIq(String type, String jid, [XmlElement vCardEl]) {
     StropheBuilder iq =
         Strophe.$iq(jid != null ? {'type': type, 'to': jid} : {'type': type});
 

@@ -2,7 +2,13 @@ import 'package:strophe/src/core/Strophe.Builder.dart';
 import 'package:strophe/src/core/Strophe.Connection.dart';
 import 'package:strophe/src/core/core.dart';
 import 'package:strophe/src/plugins/plugins.dart';
-import 'package:xml/xml.dart' as xml;
+import 'package:xml/xml.dart';
+
+extension StropheChatStatesNotificationPlugin on StropheConnection {
+  ChatStatesNotificationPlugin get chatstates {
+    return Strophe.connectionPlugins['chatstates'];
+  }
+}
 
 /// Chat state notifications (XEP 0085) plugin
 /// @see http://xmpp.org/extensions/xep-0085.html
@@ -25,17 +31,17 @@ class ChatStatesNotificationPlugin extends PluginClass {
   }
 
   _notificationReceived(element) {
-    xml.XmlElement message;
+    XmlElement message;
     if (element is String) {
-      message = xml.XmlDocument.parse(element).rootElement;
-    } else if (element is xml.XmlElement)
+      message = XmlDocument.parse(element).rootElement;
+    } else if (element is XmlElement)
       message = element;
-    else if (element is xml.XmlDocument) message = element.rootElement;
+    else if (element is XmlDocument) message = element.rootElement;
 
     if (message != null && message.findAllElements('error').length > 0)
       return true;
 
-    /* List<xml.XmlElement> composing =
+    /* List<XmlElement> composing =
             message.findAllElements('composing').toList(),
         paused = message.findAllElements('paused').toList(),
         active = message.findAllElements('active').toList(),

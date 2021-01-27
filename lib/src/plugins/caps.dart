@@ -3,8 +3,15 @@ import 'dart:async';
 import 'package:strophe/src/core/Strophe.Builder.dart';
 import 'package:strophe/src/core/Strophe.Connection.dart';
 import 'package:strophe/src/core/core.dart';
+import 'package:strophe/src/plugins/disco.dart';
 import 'package:strophe/src/plugins/plugins.dart';
 import 'package:strophe/src/sha1.dart';
+
+extension StropheCapsPlugin on StropheConnection {
+  CapsPlugin get caps {
+    return Strophe.connectionPlugins['caps'];
+  }
+}
 
 /// Implements xep-0115 ( http://xmpp.org/extensions/xep-0115.html )
 class CapsPlugin extends PluginClass {

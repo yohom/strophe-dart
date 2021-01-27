@@ -4,6 +4,7 @@ import 'package:strophe/src/core/Strophe.Builder.dart';
 import 'package:strophe/src/core/Strophe.Connection.dart';
 import 'package:strophe/src/core/Strophe.SASLMechanism.dart';
 import 'package:strophe/src/core/core.dart';
+import 'package:strophe/src/plugins/disco.dart';
 import 'package:strophe/src/plugins/plugins.dart';
 import 'package:strophe/src/utils.dart';
 import 'package:xml/xml.dart';
@@ -20,6 +21,12 @@ This library is free software; you can redistribute it and/or modify it
  General Public License for more details.
   Copyright (c) dodo <dodo@blacksec.org>, 2011
 */
+
+extension StropheRegisterPlugin on StropheConnection {
+  RegisterPlugin get register {
+    return Strophe.connectionPlugins['register'];
+  }
+}
 
 class RegisterPlugin extends PluginClass {
   String domain;

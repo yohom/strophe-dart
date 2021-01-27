@@ -2,7 +2,13 @@ import 'package:strophe/src/core/Strophe.Connection.dart';
 import 'package:strophe/src/core/core.dart';
 import 'package:strophe/src/plugins/plugins.dart';
 
-class LastActivity extends PluginClass {
+extension StropheLastActivityPlugin on StropheConnection {
+  LastActivityPlugin get lastactivity {
+    return Strophe.connectionPlugins['lastactivity'];
+  }
+}
+
+class LastActivityPlugin extends PluginClass {
   init(StropheConnection conn) {
     this.connection = conn;
     Strophe.addNamespace('LAST_ACTIVITY', "jabber:iq:last");

@@ -5,6 +5,12 @@ import 'package:strophe/src/core/core.dart';
 import 'package:strophe/src/plugins/plugins.dart';
 import 'package:xml/xml.dart';
 
+extension StropheMucPlugin on StropheConnection {
+  MucPlugin get muc {
+    return Strophe.connectionPlugins['muc'];
+  }
+}
+
 class MucPlugin extends PluginClass {
   /*
  *Plugin to implement the MUC extension.

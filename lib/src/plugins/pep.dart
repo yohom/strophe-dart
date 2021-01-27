@@ -1,5 +1,6 @@
 import 'package:strophe/src/core/Strophe.Connection.dart';
 import 'package:strophe/src/core/core.dart';
+import 'package:strophe/src/plugins/caps.dart';
 import 'package:strophe/src/plugins/plugins.dart';
 import 'package:strophe/src/plugins/pubsub.dart';
 import 'package:xml/xml.dart';

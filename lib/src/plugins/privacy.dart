@@ -4,6 +4,12 @@ import 'package:strophe/src/core/core.dart';
 import 'package:strophe/src/plugins/plugins.dart';
 import 'package:xml/xml.dart';
 
+extension StrophePrivacyPlugin on StropheConnection {
+  PrivacyPlugin get privacy {
+    return Strophe.connectionPlugins['privacy'];
+  }
+}
+
 class PrivacyPlugin extends PluginClass {
   /// Variable: lists
   /// Available privacy lists

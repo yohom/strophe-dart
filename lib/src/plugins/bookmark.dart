@@ -2,7 +2,13 @@ import 'package:strophe/src/core/Strophe.Builder.dart';
 import 'package:strophe/src/core/Strophe.Connection.dart';
 import 'package:strophe/src/core/core.dart';
 import 'package:strophe/src/plugins/plugins.dart';
-import 'package:xml/xml.dart' as xml;
+import 'package:xml/xml.dart';
+
+extension StropheBookMarkPlugin on StropheConnection {
+  BookMarkPlugin get bookmarks {
+    return Strophe.connectionPlugins['bookmarks'];
+  }
+}
 
 class BookMarkPlugin extends PluginClass {
   init(StropheConnection connection) {
@@ -88,8 +94,8 @@ class BookMarkPlugin extends PluginClass {
       this.connection.sendIQ(stanza.tree(), success, error);
     };
 
-    this.get((xml.XmlElement s) {
-      List<xml.XmlElement> confs = s.findAllElements('conference').toList();
+    this.get((XmlElement s) {
+      List<XmlElement> confs = s.findAllElements('conference').toList();
       bool bookmarked = false;
       for (int i = 0; i < confs.length; i++) {
         Map<String, dynamic> conferenceAttr = {
@@ -97,8 +103,7 @@ class BookMarkPlugin extends PluginClass {
           'autojoin': confs[i].getAttribute('autojoin') ?? false
         };
         String roomName = confs[i].getAttribute('name');
-        List<xml.XmlElement> nickname =
-            confs[i].findAllElements('nick').toList();
+        List<XmlElement> nickname = confs[i].findAllElements('nick').toList();
 
         if (conferenceAttr['jid'] == roomJid) {
           // the room is already bookmarked, then update it
@@ -129,7 +134,7 @@ class BookMarkPlugin extends PluginClass {
       }
 
       _bookmarkGroupChat(!bookmarked);
-    }, (xml.XmlElement s) {
+    }, (XmlElement s) {
       if (s.findAllElements('item-not-found').length > 0) {
         _bookmarkGroupChat(true);
       } else {
@@ -166,8 +171,8 @@ class BookMarkPlugin extends PluginClass {
     }).c('item', {'id': 'current'}).c(
             'storage', {'xmlns': Strophe.NS['BOOKMARKS']});
 
-    this.get((xml.XmlElement s) {
-      List<xml.XmlElement> confs = s.findAllElements('conference').toList();
+    this.get((XmlElement s) {
+      List<XmlElement> confs = s.findAllElements('conference').toList();
       for (int i = 0; i < confs.length; i++) {
         Map<String, dynamic> conferenceAttr = {
           'jid': confs[i].getAttribute('jid'),
@@ -181,8 +186,7 @@ class BookMarkPlugin extends PluginClass {
           conferenceAttr['name'] = roomName;
         }
         stanza.c('conference', conferenceAttr);
-        List<xml.XmlElement> nickname =
-            confs[i].findAllElements('nick').toList();
+        List<XmlElement> nickname = confs[i].findAllElements('nick').toList();
         if (nickname.length == 1) {
           stanza.c('nick').t(nickname[0].text).up();
         }
@@ -210,8 +214,8 @@ class BookMarkPlugin extends PluginClass {
     }).c('item', {'id': 'current'}).c(
             'storage', {'xmlns': Strophe.NS['BOOKMARKS']});
 
-    this.get((xml.XmlElement s) {
-      List<xml.XmlElement> confs = s.findAllElements('conference').toList();
+    this.get((XmlElement s) {
+      List<XmlElement> confs = s.findAllElements('conference').toList();
       for (int i = 0; i < confs.length; i++) {
         Map<String, dynamic> conferenceAttr = {
           'jid': confs[i].getAttribute('jid'),
@@ -225,8 +229,7 @@ class BookMarkPlugin extends PluginClass {
           conferenceAttr['name'] = roomName ?? '';
         }
         stanza.c('conference', conferenceAttr);
-        List<xml.XmlElement> nickname =
-            confs[i].findAllElements('nick').toList();
+        List<XmlElement> nickname = confs[i].findAllElements('nick').toList();
         if (nick != null &&
             nick.isNotEmpty &&
             conferenceAttr['jid'] == roomJid) {

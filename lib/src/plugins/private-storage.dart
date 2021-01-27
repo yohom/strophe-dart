@@ -2,7 +2,13 @@ import 'package:strophe/src/core/Strophe.Builder.dart';
 import 'package:strophe/src/core/Strophe.Connection.dart';
 import 'package:strophe/src/core/core.dart';
 import 'package:strophe/src/plugins/plugins.dart';
-import 'package:xml/xml.dart' as xml;
+import 'package:xml/xml.dart';
+
+extension StrophePrivateStoragePlugin on StropheConnection {
+  PrivateStoragePlugin get private {
+    return Strophe.connectionPlugins['private'];
+  }
+}
 
 /**
  * This plugin is distributed under the terms of the MIT licence.
@@ -12,7 +18,7 @@ import 'package:xml/xml.dart' as xml;
 
 /// File: strophe.private.js
 /// A Strophe plugin for XMPP Private XML Storage ( http://xmpp.org/extensions/xep-0049.html )
-class PrivateStorage extends PluginClass {
+class PrivateStoragePlugin extends PluginClass {
   // called by the Strophe.Connection constructor
   init(StropheConnection conn) {
     this.connection = conn;
@@ -34,7 +40,7 @@ class PrivateStorage extends PluginClass {
     StropheBuilder iq = Strophe.$iq({'type': 'set', 'id': id})
         .c('query', {'xmlns': Strophe.NS['PRIVATE']}).c(tag, {'xmlns': ns});
 
-    xml.XmlNode d = this._transformData(data);
+    XmlNode d = this._transformData(data);
 
     if (d != null) {
       iq.cnode(d);
@@ -57,8 +63,8 @@ class PrivateStorage extends PluginClass {
     StropheBuilder iq = Strophe.$iq({'type': 'get', 'id': id})
         .c('query', {'xmlns': Strophe.NS['PRIVATE']}).c(tag, {'xmlns': ns});
 
-    this.connection.sendIQ(iq.tree(), (xml.XmlElement iq) {
-      xml.XmlNode data = iq;
+    this.connection.sendIQ(iq.tree(), (XmlElement iq) {
+      XmlNode data = iq;
 
       for (int i = 0; i < 3; i++) {
         data = data.children[0];
@@ -72,13 +78,13 @@ class PrivateStorage extends PluginClass {
   }
 
   /// PrivateFunction: _transformData
-  xml.XmlNode _transformData(c) {
+  XmlNode _transformData(c) {
     switch (c.runtimeType.toString()) {
       case "num":
       case "bool":
         return Strophe.xmlTextNode(c + '');
       case "String":
-        xml.XmlElement dom = this._textToXml(c);
+        XmlElement dom = this._textToXml(c);
 
         if (dom != null) {
           return dom;
@@ -101,11 +107,11 @@ class PrivateStorage extends PluginClass {
   ///
   /// Returns:
   /// (Object) dom - DOM Object
-  xml.XmlElement _textToXml(String text) {
+  XmlElement _textToXml(String text) {
     try {
-      return xml.XmlDocument.parse(text).rootElement;
+      return XmlDocument.parse(text).rootElement;
     } catch (e) {
-      return xml.XmlDocument.parse('<data>$text</data>').rootElement;
+      return XmlDocument.parse('<data>$text</data>').rootElement;
     }
   }
 
@@ -117,7 +123,7 @@ class PrivateStorage extends PluginClass {
   /// Returns:
   /// True if it is a DOM node
   bool _isNode(obj) {
-    return obj is xml.XmlNode;
+    return obj is XmlNode;
   }
 
   /// PrivateFunction: _isElement
@@ -128,6 +134,6 @@ class PrivateStorage extends PluginClass {
   /// Returns:
   /// True if it is a DOM element.
   bool _isElement(obj) {
-    return obj is xml.XmlElement;
+    return obj is XmlElement;
   }
 }

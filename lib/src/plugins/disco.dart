@@ -4,6 +4,12 @@ import 'package:strophe/src/core/core.dart';
 import 'package:strophe/src/plugins/plugins.dart';
 import 'package:xml/xml.dart';
 
+extension StropheDiscoPlugin on StropheConnection {
+  DiscoPlugin get disco {
+    return Strophe.connectionPlugins['disco'];
+  }
+}
+
 class DiscoPlugin extends PluginClass {
   List<Map<String, String>> _identities = [];
   List<String> _features = [];

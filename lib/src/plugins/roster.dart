@@ -2,7 +2,13 @@ import 'package:strophe/src/core/Strophe.Builder.dart';
 import 'package:strophe/src/core/Strophe.Connection.dart';
 import 'package:strophe/src/core/core.dart';
 import 'package:strophe/src/plugins/plugins.dart';
-import 'package:xml/xml.dart' as xml;
+import 'package:xml/xml.dart';
+
+extension StropheRosterPlugin on StropheConnection {
+  RosterPlugin get roster {
+    return Strophe.connectionPlugins['roster'];
+  }
+}
 
 class RosterPlugin extends PluginClass {
   List<Function> _callbacks;
@@ -113,9 +119,9 @@ class RosterPlugin extends PluginClass {
     StropheBuilder iq = Strophe.$iq(
             {'type': 'get', 'id': this.connection.getUniqueId('roster')})
         .c('query', attrs);
-    return this.connection.sendIQ(iq.tree(), (xml.XmlElement stanza) {
+    return this.connection.sendIQ(iq.tree(), (XmlElement stanza) {
       this._onReceiveRosterSuccess(userCallback, stanza);
-    }, (xml.XmlElement stanza) {
+    }, (XmlElement stanza) {
       this._onReceiveRosterError(userCallback, stanza);
     });
   }
@@ -292,7 +298,7 @@ class RosterPlugin extends PluginClass {
   /** PrivateFunction: _onReceiveRosterSuccess
    *
    */
-  _onReceiveRosterSuccess(Function userCallback, xml.XmlElement stanza) {
+  _onReceiveRosterSuccess(Function userCallback, XmlElement stanza) {
     this._updateItems(stanza);
     this._call_backs(this.items);
     if (userCallback != null) {
@@ -303,14 +309,14 @@ class RosterPlugin extends PluginClass {
   /** PrivateFunction: _onReceiveRosterError
    *
    */
-  _onReceiveRosterError(Function userCallback, xml.XmlElement stanza) {
+  _onReceiveRosterError(Function userCallback, XmlElement stanza) {
     userCallback(this.items);
   }
 
   /** PrivateFunction: _onReceivePresence
    * Handle presence
    */
-  _onReceivePresence(xml.XmlElement presence) {
+  _onReceivePresence(XmlElement presence) {
     // TODO: from is optional
     String jid = presence.getAttribute('from');
     String from = Strophe.getBareJidFromJid(jid);
@@ -372,7 +378,7 @@ class RosterPlugin extends PluginClass {
   /** PrivateFunction: _onReceiveIQ
    * Handle roster push.
    */
-  _onReceiveIQ(xml.XmlElement iq) {
+  _onReceiveIQ(XmlElement iq) {
     String id = iq.getAttribute('id');
     String from = iq.getAttribute('from');
     // Receiving client MUST ignore stanza unless it has no from or from = user's JID.
@@ -390,14 +396,14 @@ class RosterPlugin extends PluginClass {
   /** PrivateFunction: _updateItems
    * Update items from iq
    */
-  _updateItems(xml.XmlElement iq) {
-    List<xml.XmlElement> queries = iq.findAllElements('query').toList();
+  _updateItems(XmlElement iq) {
+    List<XmlElement> queries = iq.findAllElements('query').toList();
     if (queries.length != 0) {
-      xml.XmlElement query = queries[0];
+      XmlElement query = queries[0];
       if (query == null) return;
-      List<xml.XmlElement> listItem = query.findAllElements('item').toList();
+      List<XmlElement> listItem = query.findAllElements('item').toList();
       if (listItem.length > 0) {
-        xml.XmlElement item = listItem[0];
+        XmlElement item = listItem[0];
         this.ver = item.getAttribute('ver');
       }
       Strophe.forEachChild(query, 'item', (rosterItem) {
@@ -409,7 +415,7 @@ class RosterPlugin extends PluginClass {
   /** PrivateFunction: _updateItem
    * Update internal representation of roster item
    */
-  _updateItem(xml.XmlElement itemTag) {
+  _updateItem(XmlElement itemTag) {
     if (itemTag == null) return;
     String jid = itemTag.getAttribute("jid");
     String name = itemTag.getAttribute("name");

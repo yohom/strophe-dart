@@ -2,6 +2,12 @@ import 'package:strophe/src/core/Strophe.Connection.dart';
 import 'package:strophe/src/core/core.dart';
 import 'package:strophe/src/plugins/plugins.dart';
 
+extension StropheAdministrationPlugin on StropheConnection {
+  AdministrationPlugin get admin {
+    return Strophe.connectionPlugins['admin'];
+  }
+}
+
 class AdministrationPlugin extends PluginClass {
   @override
   init(StropheConnection conn) {
