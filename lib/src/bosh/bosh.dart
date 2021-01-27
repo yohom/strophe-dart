@@ -93,7 +93,7 @@ class StropheBosh extends ServiceType {
   ///
   ///  Returns:
   ///    A Strophe.Builder with a <body/> element.
-  StropheBuilder _buildBody() {
+  StropheBuilder buildBody() {
     StropheBuilder bodyWrap = Strophe.$build(
       'body',
       {
@@ -140,7 +140,7 @@ class StropheBosh extends ServiceType {
     this.errors = 0;
 
     // build the body tag
-    var body = this._buildBody().attrs({
+    var body = this.buildBody().attrs({
       'to': this._conn.domain,
       'xml:lang': 'en',
       'wait': this.wait.toString(),
@@ -421,7 +421,7 @@ class StropheBosh extends ServiceType {
     if (_callback == null) {
       _callback = this._conn.connectCb;
     }
-    var body = this._buildBody();
+    var body = this.buildBody();
     StropheRequest req =
         StropheRequest(body.tree(), null, body.tree().getAttribute('rid'));
     req.func = () => this._onRequestStateChange(_callback, req);
@@ -472,7 +472,7 @@ class StropheBosh extends ServiceType {
     }
 
     if (this._requests.length < 2 && data.length > 0) {
-      StropheBuilder body = this._buildBody();
+      StropheBuilder body = this.buildBody();
       for (int i = 0; i < data.length; i++) {
         if (data[i] != null) {
           if (data[i] == "restart") {
@@ -845,7 +845,7 @@ class StropheBosh extends ServiceType {
   /// TODO: is the pres type is some kind of XmlNode?
   void _sendTerminate(pres) {
     Strophe.info('_sendTerminate was called');
-    StropheBuilder body = this._buildBody().attrs({'type': 'terminate'});
+    StropheBuilder body = this.buildBody().attrs({'type': 'terminate'});
     if (pres != null) {
       body.cnode(pres.tree());
     }

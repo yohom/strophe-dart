@@ -1242,7 +1242,7 @@ class StropheConnection {
 //    (String) condition - the error condition or null
 //    (XMLElement) elem - The triggering stanza.
 //
-  changeConnectStatus(int status, String condition, [xml.XmlNode elem]) {
+  changeConnectStatus(int status, [String condition, xml.XmlNode elem]) {
     this._changeConnectStatus(status, condition, elem);
   }
 
