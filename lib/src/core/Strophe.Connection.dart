@@ -1286,7 +1286,7 @@ class StropheConnection {
     return this._doDisconnect(condition);
   }
 
-  _doDisconnect([condition]) {
+  void _doDisconnect([condition]) {
     if (this._idleTimeout != null) {
       this._idleTimeout.cancel();
     }
@@ -2011,13 +2011,13 @@ class StropheConnection {
   ///   (String) type - The stanza type attribute to match.
   ///   (String) id - The stanza id attribute to match.
   ///
-  StropheHandler addSysHandler(
-      Function handler, String ns, String name, String type, String id) {
+  StropheHandler addSysHandler(Function handler, String ns, String name,
+      [String type, String id]) {
     return _addSysHandler(handler, ns, name, type, id);
   }
 
-  StropheHandler _addSysHandler(
-      Function handler, String ns, String name, String type, String id) {
+  StropheHandler _addSysHandler(Function handler, String ns, String name,
+      [String type, String id]) {
     StropheHandler hand = StropheHandler.handler(handler, ns, name, type, id);
     hand.user = false;
     this.addHandlers.add(hand);
