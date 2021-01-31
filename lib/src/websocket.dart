@@ -162,8 +162,9 @@ class StropheWebSocket extends ServiceType {
             onError: this._onError, onDone: this._onClose);
         this._onOpen();
       }).catchError((e) {
-        // todo: handle error
-        // this._conn.connexionError("impossible de joindre le serveur XMPP : $e");
+        this
+            ._conn
+            .changeConnectStatus(Strophe.Status['CONNFAIL'], 'bad-service');
       });
     }
   }
