@@ -1,8 +1,7 @@
-import 'package:xml/xml.dart' as xml;
-
 import 'package:strophe/src/core/Strophe.Builder.dart';
 import 'package:strophe/src/core/Strophe.SASLMechanism.dart';
 import 'package:strophe/src/plugins/plugins.dart';
+import 'package:xml/xml.dart' as xml;
 
 /// Class: Strophe
 /// An object container for all Strophe library functions.
@@ -87,7 +86,7 @@ class Strophe {
   /// NS.XHTML_IM - XHTML-IM namespace from XEP 71.
   /// NS.XHTML - XHTML body namespace from XEP 71.
   /// TODO: use enums
-  static const Map<String, String> NS = {
+  static Map<String, String> NS = {
     'HTTPBIND': "http://jabber.org/protocol/httpbind",
     'BOSH': "urn:xmpp:xbosh",
     'CLIENT': "jabber:client",
