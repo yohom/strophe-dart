@@ -152,7 +152,7 @@ class StropheSASLAnonymous extends StropheSASLMechanism {
 
 ///  SASL PLAIN authentication.
 class StropheSASLPlain extends StropheSASLMechanism {
-  StropheSASLPlain() : super("PLAIN", true, 30);
+  StropheSASLPlain() : super("PLAIN", true, 70);
 
   @override
   bool test(StropheConnection connection) {
